@@ -1,6 +1,23 @@
-.DS_Store
-/.build
-/Packages
+# macos
+*.DS_Store
+
+# XCode
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+*.xcworkspace/
+project.xcworkspace/
 xcuserdata/
+!*.xcworkspace/contents.xcworkspacedata
+!*.xcodeproj/project.pbxproj
+
+# AppCode
+.idea/
+
+# SPM
 .swiftpm/
 Package.resolved
+/Packages
+/.build
