@@ -20,9 +20,9 @@ Record and inspect logs and `URLSession` network requests right from your iOS ap
 
 ## Getting Started
 
-1. Follow [Pulse docs](https://kean-docs.github.io/pulse/documentation/pulse/) to integrate `Pulse` framework and enable [network logging](https://kean-docs.github.io/pulse/documentation/pulse/networklogging-article)
-2. Follow [PulseUI docs](https://kean-docs.github.io/pulseui/documentation/pulseui/) to add Pulse console into your app (see `MainView`)
-2. Download [Pulse Pro](https://github.com/kean/PulsePro) to use remote logging and view logs shared from other devices
+1. Add [`Pulse`](https://kean-docs.github.io/pulse/documentation/pulse/) framework into your app and enable [network logging](https://kean-docs.github.io/pulse/documentation/pulse/networklogging-article) to start collecting logs
+2. Add [`PulseUI`](https://kean-docs.github.io/pulseui/documentation/pulseui/) framework into your app and show a `MainView` when you want to see the logs on the device
+2. Download [Pulse Pro](https://github.com/kean/PulsePro) if you want to view logs shared from the device or view the device in real-time. To use remote logging, configure your app to use [local networking](https://developer.apple.com/documentation/bundleresources/information_property_list/nslocalnetworkusagedescription) and then enable remote logging from the PulseUI Settings tab.
 
 ## Documentation
 
