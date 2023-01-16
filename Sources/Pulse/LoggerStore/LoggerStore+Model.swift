@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import CoreData
 
@@ -144,6 +144,7 @@ extension LoggerStore {
             Attribute(name: "size", type: .integer32AttributeType),
             Attribute(name: "decompressedSize", type: .integer32AttributeType),
             Attribute(name: "linkCount", type: .integer16AttributeType),
+            Attribute(name: "rawContentType", type: .stringAttributeType),
             Attribute(name: "inlineData", type: .binaryDataAttributeType)
         ]
 

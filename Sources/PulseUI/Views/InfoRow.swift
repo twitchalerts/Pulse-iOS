@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import SwiftUI
 
@@ -20,4 +20,12 @@ struct InfoRow: View {
             }
         }
     }
+}
+
+struct KeyValueRow: Identifiable {
+    let id: Int
+    let item: (String, String?)
+
+    var title: String { item.0 }
+    var details: String? { item.1 }
 }

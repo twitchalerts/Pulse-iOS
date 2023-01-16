@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import Foundation
 
@@ -9,16 +9,70 @@ import Foundation
 /// - note: ``NetworkLogger`` is used internally by ``URLSessionProxyDelegate`` and
 /// should generally not be used directly.
 public final class NetworkLogger: @unchecked Sendable {
-    private let store: LoggerStore
-    private let lock = NSLock()
     private let configuration: Configuration
+    private let store: LoggerStore
+
+    private var includedHosts: [Regex] = []
+    private var includedURLs: [Regex] = []
+    private var excludedHosts: [Regex] = []
+    private var excludedURLs: [Regex] = []
+
+    private var sensitiveHeaders: [Regex] = []
+    private var sensitiveQueryItems: Set<String> = []
+    private var sensitiveDataFields: Set<String> = []
+
+    private let lock = NSLock()
 
     /// The logger configuration.
     public struct Configuration: Sendable {
         /// If enabled, the requests are not marked as completed until the decoding
         /// is done (see ``NetworkLogger/logTask(_:didFinishDecodingWithError:)``.
         /// If the request itself fails, the task completes immediately.
-        public var isWaitingForDecoding: Bool
+        public var isWaitingForDecoding = false
+
+        /// Store logs only for the included hosts.
+        ///
+        /// - note: Supports wildcards, e.g. `*.example.com`, and full regex
+        /// when ``isRegexEnabled`` option is enabled.
+        public var includedHosts: Set<String> = []
+
+        /// Store logs only for the included URLs.
+        ///
+        /// - note: Supports wildcards, e.g. `*.example.com`, and full regex
+        /// when ``isRegexEnabled`` option is enabled.
+        public var includedURLs: Set<String> = []
+
+        /// Exclude the given hosts from the logs.
+        ///
+        /// - note: Supports wildcards, e.g. `*.example.com`, and full regex
+        /// when ``isRegexEnabled`` option is enabled.
+        public var excludedHosts: Set<String> = []
+
+        /// Exclude the given URLs from the logs.
+        ///
+        /// - note: Supports wildcards, e.g. `*.example.com`, and full regex
+        /// when ``isRegexEnabled`` option is enabled.
+        public var excludedURLs: Set<String> = []
+
+        /// Redact the given HTTP headers from the logged requests and responses.
+        ///
+        /// - note: Supports wildcards, e.g. `X-*`, and full regex
+        /// when ``isRegexEnabled`` option is enabled.
+        public var sensitiveHeaders: Set<String> = []
+
+        /// Redact the given query items from the URLs.
+        ///
+        /// - note: Supports only plain strings. Case-sensitive.
+        public var sensitiveQueryItems: Set<String> = []
+
+        /// Redact the given JSON fields from the logged requests and responses bodies.
+        ///
+        /// - note: Supports only plain strings. Case-sensitive.
+        public var sensitiveDataFields: Set<String> = []
+
+        /// If enabled, processes `include` and `exclude` patterns using regex.
+        /// By default, patterns support only basic wildcard syntax: `*.example.com`.
+        public var isRegexEnabled = false
 
         /// Gets called when the logger receives an event. You can use it to
         /// modify the event before it is stored in order, for example, filter
@@ -26,13 +80,17 @@ public final class NetworkLogger: @unchecked Sendable {
         /// is ignored completely.
         public var willHandleEvent: @Sendable (LoggerStore.Event) -> LoggerStore.Event? = { $0 }
 
-        /// Initializes the configuration.
+        /// Initializes the default configuration.
+        public init() {}
+
+        // Deprecated in Pulse 3.0
+        @available(*, deprecated, message: "The isWaitingForDecoding parameter was removed")
         public init(isWaitingForDecoding: Bool = false) {
             self.isWaitingForDecoding = isWaitingForDecoding
         }
     }
 
-    /// Initializers the network logger.
+    /// Initialiers the network logger.
     ///
     /// - parameters:
     ///   - store: The target store for network requests.
@@ -40,6 +98,42 @@ public final class NetworkLogger: @unchecked Sendable {
     public init(store: LoggerStore = .shared, configuration: Configuration = .init()) {
         self.store = store
         self.configuration = configuration
+        self.processPatterns()
+    }
+
+    /// Initialiers and configures the network logger.
+    public convenience init(store: LoggerStore = .shared, _ configure: (inout Configuration) -> Void) {
+        var configuration = Configuration()
+        configure(&configuration)
+        self.init(store: store, configuration: configuration)
+    }
+
+    // MARK: Patterns
+
+    private func processPatterns() {
+        func process(_ pattern: String) -> Regex? {
+            process(pattern, options: [])
+        }
+
+        func process(_ pattern: String, options: [Regex.Options]) -> Regex? {
+            do {
+                let pattern = configuration.isRegexEnabled ? pattern : expandingWildcards(pattern)
+                return try Regex(pattern)
+            } catch {
+                debugPrint("Failed to parse pattern: \(pattern) \(error)")
+                return nil
+            }
+        }
+
+        self.includedHosts = configuration.includedHosts.compactMap(process)
+        self.includedURLs = configuration.includedURLs.compactMap(process)
+        self.excludedHosts = configuration.excludedHosts.compactMap(process)
+        self.excludedURLs = configuration.excludedURLs.compactMap(process)
+        self.sensitiveHeaders = configuration.sensitiveHeaders.compactMap {
+            process($0, options: [.caseInsensitive])
+        }
+        self.sensitiveQueryItems = configuration.sensitiveQueryItems
+        self.sensitiveDataFields = configuration.sensitiveDataFields
     }
 
     // MARK: Logging
@@ -76,6 +170,7 @@ public final class NetworkLogger: @unchecked Sendable {
 
         send(.networkTaskProgressUpdated(.init(
             taskId: context.taskId,
+            url: task.originalRequest?.url,
             completedUnitCount: progress.completed,
             totalUnitCount: progress.total
         )))
@@ -108,7 +203,7 @@ public final class NetworkLogger: @unchecked Sendable {
     private func _logTask(_ task: URLSessionTask, didCompleteWithError error: Error?) {
         lock.lock()
         let context = self.context(for: task)
-        tasks[ObjectIdentifier(task)] = nil
+        tasks[TaskKey(task: task)] = nil
 
         guard let originalRequest = task.originalRequest ?? context.request else {
             lock.unlock()
@@ -135,15 +230,50 @@ public final class NetworkLogger: @unchecked Sendable {
     }
 
     private func send(_ event: LoggerStore.Event) {
-        guard let event = configuration.willHandleEvent(event) else {
+        guard filter(event) else {
+            return
+        }
+        guard let event = configuration.willHandleEvent(preprocess(event)) else {
             return
         }
         store.handle(event)
     }
 
+    /// Check if the events can be stored (included and not excluded).
+    private func filter(_ event: LoggerStore.Event) -> Bool {
+        guard let url = event.url else {
+            return false // Should never happen
+        }
+        var host = url.host ?? ""
+        if url.scheme == nil, let url = URL(string: "https://" + url.absoluteString) {
+            host = url.host ?? "" // URL(string: "example.com")?.host with not scheme returns host: ""
+        }
+        let absoluteString = url.absoluteString
+        if !includedHosts.isEmpty || !includedURLs.isEmpty {
+            guard includedHosts.contains(where: { $0.isMatch(host) }) ||
+                    includedURLs.contains(where: { $0.isMatch(absoluteString) }) else {
+                return false
+            }
+        }
+        if !excludedHosts.isEmpty && excludedHosts.contains(where: { $0.isMatch(host) }) {
+            return false
+        }
+        if !excludedURLs.isEmpty && excludedURLs.contains(where: { $0.isMatch(absoluteString) }) {
+            return false
+        }
+        return true
+    }
+
+    private func preprocess(_ event: LoggerStore.Event) -> LoggerStore.Event {
+        event
+            .redactingSensitiveHeaders(sensitiveHeaders)
+            .redactingSensitiveQueryItems(sensitiveQueryItems)
+            .redactingSensitiveResponseDataFields(sensitiveDataFields)
+    }
+
     // MARK: - Private
 
-    private var tasks: [ObjectIdentifier: TaskContext] = [:]
+    private var tasks: [TaskKey: TaskContext] = [:]
 
     final class TaskContext {
         let taskId = UUID()
@@ -154,11 +284,12 @@ public final class NetworkLogger: @unchecked Sendable {
 
     private func context(for task: URLSessionTask) -> TaskContext {
         func getContext() -> TaskContext {
-            if let context = tasks[ObjectIdentifier(task)] {
+            let key = TaskKey(task: task)
+            if let context = tasks[key] {
                 return context
             }
             let context = TaskContext()
-            tasks[ObjectIdentifier(task)] = context
+            tasks[key] = context
             return context
         }
         let context = getContext()
@@ -167,10 +298,31 @@ public final class NetworkLogger: @unchecked Sendable {
         }
         return context
     }
+
+    private struct TaskKey: Hashable {
+        weak var task: URLSessionTask?
+
+        var id: ObjectIdentifier? { task.map(ObjectIdentifier.init) }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id?.hashValue)
+        }
+
+        static func == (lhs: TaskKey, rhs: TaskKey) -> Bool {
+            lhs.task != nil && lhs.id == rhs.id
+        }
+    }
 }
 
 private extension URLSessionTask {
     var url: String? {
         originalRequest?.url?.absoluteString
     }
+}
+
+private func expandingWildcards(_ pattern: String) -> String {
+    let pattern = pattern
+        .replacingOccurrences(of: ".", with: "\\.")
+        .replacingOccurrences(of: "*", with: ".*?")
+    return "^\(pattern)$"
 }

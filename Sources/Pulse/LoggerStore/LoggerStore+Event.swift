@@ -1,16 +1,12 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
-#if !os(macOS) && !targetEnvironment(macCatalyst) && swift(>=5.7)
 import Foundation
-#else
-@preconcurrency import Foundation
-#endif
 
 extension LoggerStore {
     /// The events used for syncing data between stores.
-    public enum Event: Sendable {
+    @frozen public enum Event: Sendable {
         case messageStored(MessageCreated)
         case networkTaskCreated(NetworkTaskCreated)
         case networkTaskProgressUpdated(NetworkTaskProgressUpdated)
@@ -60,11 +56,13 @@ extension LoggerStore {
 
         public struct NetworkTaskProgressUpdated: Codable, Sendable {
             public var taskId: UUID
+            public var url: URL?
             public var completedUnitCount: Int64
             public var totalUnitCount: Int64
 
-            public init(taskId: UUID, completedUnitCount: Int64, totalUnitCount: Int64) {
+            public init(taskId: UUID, url: URL?, completedUnitCount: Int64, totalUnitCount: Int64) {
                 self.taskId = taskId
+                self.url = url
                 self.completedUnitCount = completedUnitCount
                 self.totalUnitCount = totalUnitCount
             }
@@ -95,6 +93,19 @@ extension LoggerStore {
                 self.responseBody = responseBody
                 self.metrics = metrics
                 self.session = session
+            }
+        }
+
+        var url: URL? {
+            switch self {
+            case .messageStored:
+                return nil
+            case .networkTaskCreated(let event):
+                return event.originalRequest.url
+            case .networkTaskProgressUpdated(let event):
+                return event.url
+            case .networkTaskCompleted(let event):
+                return event.originalRequest.url
             }
         }
     }

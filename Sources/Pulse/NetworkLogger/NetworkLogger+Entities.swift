@@ -1,12 +1,8 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
-#if !os(macOS) && !targetEnvironment(macCatalyst) && swift(>=5.7)
 import Foundation
-#else
-@preconcurrency import Foundation
-#endif
 
 extension NetworkLogger {
     public struct Request: Hashable, Codable, Sendable {
@@ -52,14 +48,6 @@ extension NetworkLogger {
             self.rawCachePolicy = urlRequest.cachePolicy.rawValue
             self.timeout = urlRequest.timeoutInterval
             self.options = Options(urlRequest)
-
-        }
-
-        /// Redacts values for the provided headers.
-        public func redactingSensitiveHeaders(_ redactedHeaders: Set<String>) -> Request {
-            var copy = self
-            copy.headers = _redactingSensitiveHeaders(redactedHeaders, from: headers)
-            return copy
         }
     }
 
@@ -71,17 +59,15 @@ extension NetworkLogger {
             headers?["Content-Type"].flatMap(ContentType.init)
         }
 
+        var isSuccess: Bool {
+            // By default, use 200 for non-HTTP responses
+            (200..<400).contains(statusCode ?? 200)
+        }
+
         public init(_ urlResponse: URLResponse) {
             let httpResponse = urlResponse as? HTTPURLResponse
             self.statusCode = httpResponse?.statusCode
             self.headers = httpResponse?.allHeaderFields as? [String: String]
-        }
-
-        /// Redacts values for the provided headers.
-        public func redactingSensitiveHeaders(_ redactedHeaders: Set<String>) -> Response {
-            var copy = self
-            copy.headers = _redactingSensitiveHeaders(redactedHeaders, from: headers)
-            return copy
         }
     }
 
@@ -104,8 +90,13 @@ extension NetworkLogger {
             } else {
                 self.domain = error.domain
             }
-            self.debugDescription = String(describing: error)
             self.underlyingError = UnderlyingError(error)
+            // NetworkLogger.DecodingError has a custom description
+            if let error = underlyingError?.error {
+                self.debugDescription = (error as NSError).debugDescription
+            } else {
+                self.debugDescription = error.debugDescription
+            }
         }
 
         enum UnderlyingError: Codable, Sendable {
@@ -360,7 +351,7 @@ extension NetworkLogger {
         }
     }
 
-    public enum DecodingError: Error, Codable, Sendable {
+    public enum DecodingError: Error, Codable, CustomDebugStringConvertible, Sendable {
         case typeMismatch(type: String, context: Context)
         case valueNotFound(type: String, context: Context)
         case keyNotFound(codingKey: CodingKey, context: Context)
@@ -369,18 +360,22 @@ extension NetworkLogger {
 
         public static let domain = "DecodingError"
 
-        public struct Context: Codable, Sendable {
+        public struct Context: Codable, CustomDebugStringConvertible, Sendable {
             public var codingPath: [CodingKey]
             public var debugDescription: String
 
             public init(_ context: Swift.DecodingError.Context) {
                 self.codingPath = context.codingPath.map(CodingKey.init)
-                self.debugDescription = context.debugDescription
+                self.debugDescription = context.debugDescription.trimmingCharacters(in: .punctuationCharacters)
             }
 
             public init(codingPath: [CodingKey], debugDescription: String) {
                 self.codingPath = codingPath
                 self.debugDescription = debugDescription
+            }
+
+            var formattedPath: String {
+                codingPath.map(\.debugDescription).joined(separator: ".")
             }
         }
 
@@ -398,8 +393,8 @@ extension NetworkLogger {
 
             public var debugDescription: String {
                 switch self {
-                case .string(let value): return "CodingKey.string(\"\(value)\")"
-                case .int(let value): return "CodingKey.int(\(value))"
+                case .string(let value): return "\(value)"
+                case .int(let value): return "\(value)"
                 }
             }
         }
@@ -426,6 +421,21 @@ extension NetworkLogger {
             case .keyNotFound(_, let context): return context
             case .dataCorrupted(let context): return context
             case .unknown: return nil
+            }
+        }
+
+        public var debugDescription: String {
+            switch self {
+            case .typeMismatch(let type, let context):
+                return "DecodingError.typeMismatch(type: \"\(type)\", path: \"\(context.formattedPath)\", \"\(context.debugDescription)\")"
+            case .valueNotFound(let type, let context):
+                return "DecodingError.valueNotFound(type: \"\(type)\", path: \"\(context.formattedPath)\", \"\(context.debugDescription)\")"
+            case .keyNotFound(let codingKey, let context):
+                return "DecodingError.keyNotFound(key: \"\(codingKey.debugDescription)\", path: \"\(context.formattedPath)\", \"\(context.debugDescription)\")"
+            case .dataCorrupted(let context):
+                return "DecodingError.dataCorrupted(path: \(context.formattedPath), \"\(context.debugDescription)\")"
+            case .unknown:
+                return "DecodingError.unknown"
             }
         }
     }
@@ -461,6 +471,8 @@ extension NetworkLogger {
             self = ContentType(rawValue: value) ?? .any
         }
 
+        public var isJSON: Bool { type.contains("json") }
+        public var isPDF: Bool { type.contains("pdf") }
         public var isImage: Bool { type.hasPrefix("image/") }
         public var isHTML: Bool { type.contains("html") }
         public var isEncodedForm: Bool { type == "application/x-www-form-urlencoded" }
@@ -473,20 +485,4 @@ private func parseParameter(_ param: Substring) -> (String, String)? {
         return nil
     }
     return (name.trimmingCharacters(in: .whitespaces), value.trimmingCharacters(in: .whitespaces))
-}
-
-private func _redactingSensitiveHeaders(_ redactedHeaders: Set<String>, from headers: [String: String]?) -> [String: String]? {
-    guard let headers = headers else {
-        return nil
-    }
-    var newHeaders: [String: String] = [:]
-    let redactedHeaders = Set(redactedHeaders.map { $0.lowercased() })
-    for (key, value) in headers {
-        if redactedHeaders.contains(key.lowercased()) {
-            newHeaders[key] = "<private>"
-        } else {
-            newHeaders[key] = value
-        }
-    }
-    return newHeaders
 }

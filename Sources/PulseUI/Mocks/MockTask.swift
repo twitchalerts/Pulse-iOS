@@ -1,11 +1,11 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import Foundation
 import Pulse
 
-#if DEBUG || PULSE_DEMO
+#if DEBUG || PULSE_MOCK_INCLUDED
 
 struct MockTask {
     var kind: Kind = .data
@@ -37,6 +37,8 @@ struct MockTask {
 }
 
 extension MockTask {
+    static let allEntities: [NetworkTaskEntity]  = MockTask.allTasks.map(LoggerStore.preview.entity)
+
     static var allTasks: [MockTask] = [.login, .profile, .repos, .octocat, .downloadNuke, .createAPI, .uploadPulseArchive, .patchRepo]
 
     /// A successful request the demonstrates:
@@ -121,9 +123,9 @@ extension MockTask {
         response: mockCreateaAPIResponse,
         responseBody: mockCreateaAPIBody,
         transactions: [
-            .init(fetchType: .networkLoad, request: mockCreateAPIOriginalRequest, response: mockCreateaAPIRedirectResponse, duration: 0.20283),
-            .init(fetchType: .localCache, request: mockCreateAPICurrentRequest, response: mockCreateaAPIResponse, duration: 0.003),
-            .init(fetchType: .networkLoad, request: mockCreateAPICurrentRequest, response: mockCreateAPIResponseNotChanged, duration: 0.0980, isReusedConnection: true),
+            .init(fetchType: .networkLoad, request: mockCreateAPICurrentRequest, response: mockCreateaAPIRedirectResponse, duration: 0.20283),
+            .init(fetchType: .localCache, request: mockCreateAPIRedirectRequest, response: mockCreateaAPIResponse, duration: 0.003),
+            .init(fetchType: .networkLoad, request: mockCreateAPIRedirectRequest, response: mockCreateAPIResponseNotChanged, duration: 0.0980, isReusedConnection: true),
         ],
         delay: 5.5
     )
@@ -141,6 +143,17 @@ extension MockTask {
         ],
         delay: 6.5,
         decodingError: mockPatchRepoDecodingError
+    )
+
+    static let networkingFailure = MockTask(
+        originalRequest: mockLoginOriginalRequest,
+        response: mockLoginResponse,
+        responseBody: mockLoginResponseBody,
+        transactions: [
+            .init(fetchType: .networkLoad, request: mockLoginCurrentRequest, response: mockLoginResponse, duration: 0.42691)
+        ],
+        delay: 0.4,
+        decodingError: URLError(URLError.Code.notConnectedToInternet)
     )
 }
 
@@ -160,12 +173,12 @@ private let mockLoginCurrentRequest = mockLoginOriginalRequest.adding(headers: [
 ])
 
 private let mockLoginResponse = HTTPURLResponse(url: "https://github.com/login", statusCode: 200, headers: [
-    "Set-Cookie": "token=ADSJ1239CX0; path=/; expires=Sun, 30 Jan 2030 21:49:04 GMT; secure; HttpOnly"
+    "Set-Cookie": "token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c; path=/; expires=Sun, 30 Jan 2030 21:49:04 GMT; secure; HttpOnly"
 ])
 
 private let mockLoginResponseBody = """
 {
-    "access-token": "a1",
+    "access-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
     "refresh-token": "m1",
     "profile": {
         "id": 1,
@@ -291,6 +304,13 @@ private let mockReposBody = Bundle.main.url(forResource: "repos", withExtension:
 private let mockCreateAPIOriginalRequest = URLRequest(url: "https://github.com/CreateAPI/Get")
 
 private let mockCreateAPICurrentRequest = mockCreateAPIOriginalRequest.adding(headers: [
+    "User-Agent": "Pulse Demo/2.0",
+    "Accept-Encoding": "gzip",
+    "Accept-Language": "en-us",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+])
+
+private let mockCreateAPIRedirectRequest = URLRequest(url: "https://github.com/kean/Get").adding(headers: [
     "User-Agent": "Pulse Demo/2.0",
     "Accept-Encoding": "gzip",
     "Accept-Language": "en-us",

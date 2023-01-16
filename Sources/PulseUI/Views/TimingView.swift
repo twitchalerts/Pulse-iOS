@@ -1,19 +1,21 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import SwiftUI
-
-#if os(iOS) || os(macOS) || os(tvOS)
 
 struct TimingView: View {
     let viewModel: TimingViewModel
 
     var body: some View {
 #if os(tvOS)
-        List(viewModel.sections) {
-            TimingSectionView(viewModel: $0, parent: viewModel)
-        }.frame(maxWidth: 1000)
+        ForEach(viewModel.sections) { item in
+            Section {
+                Button(action: {}) {
+                    TimingSectionView(viewModel: item, parent: viewModel)
+                }
+            }
+        }
 #else
         VStack(spacing: 16) {
             ForEach(viewModel.sections) {
@@ -41,8 +43,8 @@ private struct TimingSectionView: View {
                 Divider()
             }
             if !viewModel.items.isEmpty {
-                ForEach(viewModel.items) {
-                    TimingRowView(viewModel: $0, parent: parent)
+                ForEach(viewModel.items) { item in
+                    TimingRowView(viewModel: item, parent: parent)
                 }
             }
         }
@@ -55,25 +57,29 @@ private struct TimingRowView: View {
 
 #if os(tvOS)
     let barHeight: CGFloat = 20
+    let spacing: CGFloat = 48
 #else
     let barHeight: CGFloat = 14
+    let spacing: CGFloat = 12
 #endif
 
     @Environment(\.sizeCategory) var sizeCategory
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: spacing) {
             ZStack(alignment: .leading) {
                 makeTitle(viewModel.title)
                 makeTitle(parent.longestTitle).invisible() // Calculates width
             }.layoutPriority(1)
 
             bar
-            
-            ZStack(alignment: .leading) {
+
+#if !os(watchOS)
+            ZStack(alignment: .trailing) {
                 makeValue(viewModel.value)
                 makeValue(parent.longestValue).invisible() // Calculates width
             }.layoutPriority(1)
+#endif
         }
     }
 
@@ -162,7 +168,9 @@ final class TimingRowViewModel: Identifiable {
 #if DEBUG
 struct TimingView_Previews: PreviewProvider {
     static var previews: some View {
-        TimingView(viewModel: .init(sections: mockSections))
+        ScrollView {
+            TimingView(viewModel: .init(sections: mockSections))
+        }
             .padding()
 #if !os(tvOS)
             .previewLayout(.sizeThatFits)
@@ -181,6 +189,4 @@ private let mockSections = [
         TimingRowViewModel(title: "Download", value: "30.0ms", color: .systemGreen, start: 0.75, length: 100.0)
     ])
 ]
-#endif
-
 #endif

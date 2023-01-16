@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import CoreData
 import Pulse
@@ -12,8 +12,6 @@ final class ConsoleMessageDetailsViewModel {
 
     let tags: [ConsoleMessageTagViewModel]
     let text: String
-    let badge: BadgeViewModel?
-
     let message: LoggerMessageEntity
 
     static let dateFormatter: DateFormatter = {
@@ -28,7 +26,9 @@ final class ConsoleMessageDetailsViewModel {
     }()
 
     init(message: LoggerMessageEntity) {
-        self.textViewModel = RichTextViewModel(string: message.text)
+        let string = TextRenderer().preformatted(message.text)
+        self.textViewModel = RichTextViewModel(string: string)
+
         self.message = message
         self.tags = [
             ConsoleMessageTagViewModel(
@@ -39,7 +39,6 @@ final class ConsoleMessageDetailsViewModel {
             ConsoleMessageTagViewModel(title: "Label", value: message.label.name)
         ]
         self.text = message.text
-        self.badge = BadgeViewModel(message: message)
     }
 
     func prepareForSharing() -> Any {
@@ -48,13 +47,6 @@ final class ConsoleMessageDetailsViewModel {
 
     var pin: PinButtonViewModel {
         PinButtonViewModel(message: message)
-    }
-}
-
-private extension BadgeViewModel {
-    init?(message: LoggerMessageEntity) {
-        guard let level = LoggerStore.Level(rawValue: message.level) else { return nil }
-        self.init(title: level.name.uppercased(), color: Color(level: level))
     }
 }
 

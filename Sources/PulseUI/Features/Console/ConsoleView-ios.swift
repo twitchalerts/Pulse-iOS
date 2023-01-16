@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import SwiftUI
 import CoreData
@@ -10,15 +10,17 @@ import Combine
 #if os(iOS)
 
 public struct ConsoleView: View {
-    @ObservedObject var viewModel: ConsoleViewModel
-    @State private var isSharing = false
+    @StateObject private var viewModel: ConsoleViewModel
+    @State private var shareItems: ShareItems?
+    @State private var isShowingAsText = false
+    @State private var selectedShareOutput: ShareOutput?
 
     public init(store: LoggerStore = .shared) {
-        self.viewModel = ConsoleViewModel(store: store)
+        self.init(viewModel: ConsoleViewModel(store: store))
     }
 
     init(viewModel: ConsoleViewModel) {
-        self.viewModel = viewModel
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
 
     public var body: some View {
@@ -26,24 +28,53 @@ public struct ConsoleView: View {
             .onAppear(perform: viewModel.onAppear)
             .onDisappear(perform: viewModel.onDisappear)
             .edgesIgnoringSafeArea(.bottom)
-            .navigationBarTitle(Text("Console"))
+            .navigationTitle(viewModel.title)
             .navigationBarItems(
                 leading: viewModel.onDismiss.map {
-                    Button(action: $0) { Image(systemName: "xmark") }
+                    Button(action: $0) { Text("Close") }
                 },
-                trailing: ShareButton { isSharing = true }
-            )
-            .sheet(isPresented: $isSharing) {
-                if #available(iOS 14.0, *) {
-                    NavigationView {
-                        ShareStoreView(store: viewModel.store, isPresented: $isSharing)
+                trailing: HStack {
+                    if let _ = selectedShareOutput {
+                        ProgressView()
+                            .frame(width: 27, height: 27)
+                    } else {
+                        Menu(content: { shareMenu }) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .disabled(selectedShareOutput != nil)
                     }
-                } else {
-                    ShareView(ShareItems(messages: viewModel.store))
+                    ConsoleContextMenu(store: viewModel.store, insights: viewModel.insightsViewModel, isShowingAsText: $isShowingAsText)
+                }
+            )
+            .sheet(item: $shareItems, content: ShareView.init)
+            .sheet(isPresented: $isShowingAsText) {
+                NavigationView {
+                    ConsoleTextView(entities: viewModel.entitiesSubject) {
+                        isShowingAsText = false
+                    }
                 }
             }
     }
 
+    @ViewBuilder
+    private var shareMenu: some View {
+        Button(action: { share(as: .plainText) }) {
+            Label("Share as Text", systemImage: "square.and.arrow.up")
+        }
+        Button(action: { share(as: .html) }) {
+            Label("Share as HTML", systemImage: "square.and.arrow.up")
+        }
+    }
+
+    private func share(as output: ShareOutput) {
+        selectedShareOutput = output
+        viewModel.prepareForSharing(as: output) { item in
+            selectedShareOutput = nil
+            shareItems = item
+        }
+    }
+
+    @ViewBuilder
     private var contentView: some View {
         ConsoleTableView(
             header: { ConsoleToolbarView(viewModel: viewModel) },
@@ -65,29 +96,58 @@ private struct ConsoleToolbarView: View {
     @ObservedObject var viewModel: ConsoleViewModel
     @State private var isShowingFilters = false
     @State private var messageCount = 0
+    @State private var isSearching = false
 
     var body: some View {
         VStack(spacing: 8) {
             HStack(spacing: 0) {
-                SearchBar(title: "Search \(viewModel.entities.count) messages", text: $viewModel.filterTerm)
-                Button(action: { viewModel.isOnlyErrors.toggle() }) {
-                    Image(systemName: viewModel.isOnlyErrors ? "exclamationmark.octagon.fill" : "exclamationmark.octagon")
-                        .font(.system(size: 20))
-                        .foregroundColor(.accentColor)
-                }.frame(width: 40, height: 44)
-                Button(action: { isShowingFilters = true }) {
-                    Image(systemName: viewModel.searchCriteria.isDefaultSearchCriteria ? "line.horizontal.3.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.accentColor)
-                }.frame(width: 40, height: 44)
+                let suffix = viewModel.mode == .network ? "Requests" : "Messages"
+                SearchBar(
+                    title: "\(viewModel.entities.count) \(suffix)",
+                    text: $viewModel.filterTerm,
+                    isSearching: $isSearching
+                )
+                if !isSearching {
+                    filters
+                } else {
+                    Button("Cancel") {
+                        isSearching = false
+                        viewModel.filterTerm = ""
+                    }
+                    .foregroundColor(.accentColor)
+                    .padding(.horizontal, 14)
+                }
             }.buttonStyle(.plain)
         }
         .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
         .sheet(isPresented: $isShowingFilters) {
             NavigationView {
-                ConsoleFiltersView(viewModel: viewModel.searchCriteria, isPresented: $isShowingFilters)
+                ConsoleSearchView(viewModel: viewModel.searchViewModel)
+                    .inlineNavigationTitle("Filters")
+                    .navigationBarItems(trailing: Button("Done") { isShowingFilters = false })
             }
         }
+    }
+
+    @ViewBuilder
+    private var filters: some View {
+        if !viewModel.isNetworkOnly {
+            Button(action: viewModel.toggleMode) {
+                Image(systemName: viewModel.mode == .network ? "arrow.down.circle.fill" : "arrow.down.circle")
+                    .font(.system(size: 20))
+                    .foregroundColor(.accentColor)
+            }.frame(width: 40, height: 44)
+        }
+        Button(action: { viewModel.isOnlyErrors.toggle() }) {
+            Image(systemName: viewModel.isOnlyErrors ? "exclamationmark.octagon.fill" : "exclamationmark.octagon")
+                .font(.system(size: 20))
+                .foregroundColor(viewModel.isOnlyErrors ? .red : .accentColor)
+        }.frame(width: 40, height: 44)
+        Button(action: { isShowingFilters = true }) {
+            Image(systemName: viewModel.searchViewModel.isCriteriaDefault ? "line.horizontal.3.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
+                .font(.system(size: 20))
+                .foregroundColor(.accentColor)
+        }.frame(width: 40, height: 44)
     }
 }
 
@@ -100,4 +160,12 @@ struct ConsoleView_Previews: PreviewProvider {
     }
 }
 #endif
+
 #endif
+
+extension ConsoleView {
+    /// Creates a view pre-configured to display only network requests
+    public static func network(store: LoggerStore = .shared) -> ConsoleView {
+        ConsoleView(viewModel: .init(store: store, mode: .network))
+    }
+}

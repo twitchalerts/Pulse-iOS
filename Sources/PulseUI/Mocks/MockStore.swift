@@ -1,45 +1,50 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import Foundation
 import Pulse
 import CoreData
 
-#if DEBUG || PULSE_DEMO
+#if DEBUG || PULSE_MOCK_INCLUDED
 
 extension LoggerStore {
     static let mock: LoggerStore = {
-        let store: LoggerStore = MockStoreConfiguration.isUsingDefaultStore ? .shared : makeMockStore()
-
-        if MockStoreConfiguration.isDelayingLogs {
-            func populate() {
-                asyncPopulateStore(store)
-                if MockStoreConfiguration.isIndefinite {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(14)) {
-                        populate()
-                    }
-                }
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
-                populate()
-            }
-        } else {
-            _syncPopulateStore(store)
-        }
-
+        let store = makeMockStore()
+        _syncPopulateStore(store)
         return store
     }()
 
-    // Store with
     static let preview = makeMockStore()
+}
+
+extension LoggerStore {
+    static let demo: LoggerStore = {
+        let store = LoggerStore.shared
+        store.startPopulating()
+        return store
+    }()
+
+    func startPopulating(isIndefinite: Bool = false) {
+        func populate() {
+            asyncPopulateStore(self)
+            if isIndefinite {
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(12)) {
+                    populate()
+                }
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
+            populate()
+        }
+    }
 }
 
 private let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent("pulseui-demo")
 
 private let cleanup: Void = {
     try? FileManager.default.removeItem(at: rootURL)
-    try? FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true, attributes: nil)
+    try! FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true, attributes: nil)
 }()
 
 private func makeMockStore() -> LoggerStore {
@@ -71,7 +76,9 @@ private func _asyncPopulateStore(_ store: LoggerStore) async {
         Logger(label: named, store: store)
     }
 
-    let networkLogger = NetworkLogger(store: store, configuration: .init(isWaitingForDecoding: true))
+    let networkLogger = NetworkLogger(store: store) {
+        $0.isWaitingForDecoding = true
+    }
 
     let urlSession = URLSession(configuration: .default)
 
@@ -87,7 +94,7 @@ private func _asyncPopulateStore(_ store: LoggerStore) async {
 
         await Task.sleep(milliseconds: 300)
 
-        logger(named: "auth")
+        logger(named: "session")
             .log(level: .trace, "Instantiated Session")
 
         logger(named: "auth")
@@ -95,7 +102,7 @@ private func _asyncPopulateStore(_ store: LoggerStore) async {
 
         await Task.sleep(milliseconds: 800)
 
-        logger(named: "application")
+        logger(named: "analytics")
                 .log(level: .debug, "Will navigate to Dashboard")
     }
 
@@ -138,7 +145,9 @@ private func _syncPopulateStore(_ store: LoggerStore) {
         Logger(label: named, store: store)
     }
 
-    let networkLogger = NetworkLogger(store: store, configuration: .init(isWaitingForDecoding: true))
+    let networkLogger = NetworkLogger(store: store) {
+        $0.isWaitingForDecoding = true
+    }
 
     let urlSession = URLSession(configuration: .default)
 
@@ -152,13 +161,13 @@ private func _syncPopulateStore(_ store: LoggerStore) {
         logger(named: "application")
             .log(level: .info, "UIApplication.willEnterForeground")
 
-        logger(named: "auth")
+        logger(named: "session")
             .log(level: .trace, "Instantiated Session")
 
         logger(named: "auth")
             .log(level: .trace, "Instantiated the new login request")
 
-        logger(named: "application")
+        logger(named: "analytics")
                 .log(level: .debug, "Will navigate to Dashboard")
     }
 
@@ -382,7 +391,8 @@ private func getHeadersEstimatedSize(_ headers: [String: String]?) -> Int64 {
 
 extension LoggerStore {
     func entity(for task: MockTask) -> NetworkTaskEntity {
-        let configuration = NetworkLogger.Configuration(isWaitingForDecoding: true)
+        var configuration = NetworkLogger.Configuration()
+        configuration.isWaitingForDecoding = true
         _logTask(task, urlSession: URLSession.shared, logger: NetworkLogger(store: self, configuration: configuration))
         let task = (try! allTasks()).first { $0.url == task.originalRequest.url?.absoluteString }
         assert(task != nil)

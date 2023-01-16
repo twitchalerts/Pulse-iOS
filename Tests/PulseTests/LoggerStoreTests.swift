@@ -214,10 +214,12 @@ final class LoggerStoreTests: XCTestCase {
         let copyURL = directory.url.appending(filename: "copy.pulse")
 
         // WHEN
-        try store.copy(to: copyURL, predicate: NSPredicate(format: "level == %i", LoggerStore.Level.trace.rawValue))
+        let info = try store.copy(to: copyURL, predicate: NSPredicate(format: "level == %i", LoggerStore.Level.trace.rawValue))
+        try? store.close()
 
         // THEN
-        try? store.close()
+        XCTAssertEqual(info.messageCount, 2)
+        XCTAssertEqual(info.taskCount, 0)
 
         // THEN all non-trace messages are removed, as well as network messages
         // and associated blobs
@@ -573,7 +575,7 @@ final class LoggerStoreTests: XCTestCase {
 
         let context = store.viewContext
         XCTAssertEqual(try context.count(for: LoggerMessageEntity.self), 11)
-        XCTAssertEqual(try context.count(for: LoggerLabelEntity.self), 5)
+        XCTAssertEqual(try context.count(for: LoggerLabelEntity.self), 6)
         XCTAssertEqual(try context.count(for: NetworkTaskEntity.self), 3)
         XCTAssertEqual(try context.count(for: NetworkRequestEntity.self), 6)
         XCTAssertEqual(try context.count(for: NetworkResponseEntity.self), 5)

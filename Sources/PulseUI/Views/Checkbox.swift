@@ -1,39 +1,44 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import SwiftUI
 
-#if os(iOS) || os(macOS)
-
-struct Checkbox: View {
-    @Binding var isEnabled: Bool
+struct Checkbox<Label: View>: View {
+    @Binding var isOn: Bool
+    let label: () -> Label
 
     var body: some View {
-        Button(action: { isEnabled.toggle() }) {
-            Image(systemName: isEnabled ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 18))
-                .foregroundColor(.accentColor)
+#if os(iOS)
+        Button(action: { isOn.toggle() }) {
+            HStack {
+                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                    .font(.body)
+                    .foregroundColor(isOn ? .blue : .secondary)
+                label()
+                Spacer()
+            }
+            .contentShape(Rectangle())
         }.buttonStyle(.plain)
+#else
+        Toggle(isOn: $isOn, label: label)
+#endif
+    }
+}
+
+extension Checkbox where Label == Text {
+    init(_ title: String, isOn: Binding<Bool>) {
+        self.init(isOn: isOn) { Text(title) }
     }
 }
 
 struct CheckboxView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 32) {
-            HStack(spacing: 16) {
-                Checkbox(isEnabled: .constant(true))
-                    .disabled(false)
-                Checkbox(isEnabled: .constant(false))
-                    .disabled(false)
-            }
-            HStack(spacing: 16) {
-                Checkbox(isEnabled: .constant(true))
-                    .disabled(true)
-                Checkbox(isEnabled: .constant(false))
-                    .disabled(true)
-            }
+            Checkbox("Checkbox", isOn: .constant(true)).disabled(false)
+            Checkbox("Checkbox", isOn: .constant(false)).disabled(false)
+            Checkbox("Checkbox", isOn: .constant(true)).disabled(true)
+            Checkbox("Checkbox", isOn: .constant(false)).disabled(true)
         }
     }
 }
-#endif

@@ -1,10 +1,11 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import Foundation
 import CommonCrypto
 import CoreData
+import Combine
 
 extension Array {
     func chunked(into size: Int) -> [[Element]] {
@@ -14,32 +15,25 @@ extension Array {
     }
 }
 
-func prettifyJSON(_ data: Data) -> String {
-    guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
-        return String(data: data, encoding: .utf8) ?? ""
-    }
-    guard let pretty = try? JSONSerialization.data(withJSONObject: json, options: [.prettyPrinted]) else {
-        return String(data: data, encoding: .utf8) ?? ""
-    }
-    return String(data: pretty, encoding: .utf8) ?? ""
-}
-
-extension String {
+extension NSString {
     /// Finds all occurrences of the given string
-    func ranges(of substring: String, options: String.CompareOptions = []) -> [Range<String.Index>] {
-        var index = startIndex
-        var ranges = [Range<String.Index>]()
-        while index < endIndex, let range = range(of: substring, options: options, range: index..<endIndex, locale: nil) {
-            ranges.append(range)
-            if index == range.upperBound {
-                index = self.index(after: index) // Regex found empty match, move along
-            } else {
-                index = range.upperBound
+    func ranges(of substring: String, options: NSString.CompareOptions = []) -> [NSRange] {
+        var index = 0
+        var ranges = [NSRange]()
+        while index < length {
+            let range = range(of: substring, options: options, range: NSRange(location: index, length: length - index), locale: nil)
+            if range.location == NSNotFound {
+                return ranges
             }
+            ranges.append(range)
+            index = range.upperBound
         }
         return ranges
     }
 
+}
+
+extension String {
     /// Returns first range of substring.
     func firstRange(of substring: String, options: String.CompareOptions = []) -> Range<String.Index>? {
         range(of: substring, options: options, range: startIndex..<endIndex, locale: nil)

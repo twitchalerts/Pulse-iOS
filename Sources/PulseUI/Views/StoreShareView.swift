@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import SwiftUI
 import CoreData
@@ -9,7 +9,6 @@ import Combine
 
 #if os(iOS) || os(macOS)
 
-@available(iOS 14.0, tvOS 14.0, *)
 struct ShareStoreView: View {
     let store: LoggerStore
 
@@ -52,18 +51,19 @@ struct ShareStoreView: View {
     private var sectionSharingOptions: some View {
         Section {
             Picker("Time Range", selection: $viewModel.timeRange) {
-                ForEach(TimeRange.allCases, id: \.self) {
+                ForEach(SharingTimeRange.allCases, id: \.self) {
                     Text($0.rawValue).tag($0)
                 }
             }
-            Picker("Log Level", selection: $viewModel.level) {
+            Picker("Minimum Log Level", selection: $viewModel.level) {
                 Text("Trace").tag(LoggerStore.Level.trace)
                 Text("Debug").tag(LoggerStore.Level.debug)
-                Text("Errors").tag(LoggerStore.Level.error)
+                Text("Error").tag(LoggerStore.Level.error)
             }
             Picker("Output Format", selection: $viewModel.output) {
-                Text("Pulse Document").tag(ShareStoreOutput.store)
-                Text("Text Document").tag(ShareStoreOutput.text)
+                Text("Pulse File").tag(ShareStoreOutput.store)
+                Text("Plain Text").tag(ShareStoreOutput.text)
+                Text("HTML").tag(ShareStoreOutput.html)
             }
         }
     }
@@ -125,9 +125,9 @@ struct ShareStoreView: View {
 
 private final class ShareStoreViewModel: ObservableObject {
     // Sharing options
-    @Published var timeRange: TimeRange = .currentSession
-    @Published var output: ShareStoreOutput = .store
-    @Published var level: LoggerStore.Level = .trace
+    @Published var timeRange: SharingTimeRange
+    @Published var level: LoggerStore.Level
+    @Published var output: ShareStoreOutput
 
     // Settings
     @Published private(set) var isPreparingForSharing = false
@@ -137,6 +137,12 @@ private final class ShareStoreViewModel: ObservableObject {
     private var store: LoggerStore?
     private var isPrepareForSharingNeeded = false
     private var cancellable: AnyCancellable?
+
+    init() {
+        timeRange = ConsoleSettings.shared.sharingTimeRange
+        level = ConsoleSettings.shared.sharingLevel
+        output = ConsoleSettings.shared.sharingOutput
+    }
 
     func display(_ store: LoggerStore) {
         guard self.store !== store else {
@@ -150,6 +156,7 @@ private final class ShareStoreViewModel: ObservableObject {
                 .dropFirst()
                 .throttle(for: 0.5, scheduler: DispatchQueue.main, latest: true)
                 .sink { [weak self] _, _, _ in
+                    self?.saveSharingOptions()
                     self?.setNeedsPrepareForSharing()
                 }
         }
@@ -165,6 +172,12 @@ private final class ShareStoreViewModel: ObservableObject {
         }
     }
 
+    private func saveSharingOptions() {
+        ConsoleSettings.shared.sharingTimeRange = timeRange
+        ConsoleSettings.shared.sharingLevel = level
+        ConsoleSettings.shared.sharingOutput = output
+    }
+
     func prepareForSharing() {
         guard let store = store else { return }
 
@@ -174,8 +187,9 @@ private final class ShareStoreViewModel: ObservableObject {
 
         let context = store.backgroundContext
         let predicate = self.predicate
+        let output = self.output
         context.perform {
-            self.prepareForSharing(store: store, context: context, predicate: predicate)
+            self.prepareForSharing(store: store, context: context, predicate: predicate, output: output)
         }
     }
 
@@ -201,14 +215,26 @@ private final class ShareStoreViewModel: ObservableObject {
         return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
     }
 
-    private func prepareForSharing(store: LoggerStore, context: NSManagedObjectContext, predicate: NSPredicate?) {
+    private func prepareForSharing(store: LoggerStore, context: NSManagedObjectContext, predicate: NSPredicate?, output: ShareStoreOutput) {
         let directory = TemporaryDirectory()
         do {
-            let contents = try prepareForSharing(store: store, context: context, directory: directory, predicate: predicate)
-            DispatchQueue.main.async {
-                self.sharedContents = contents
-                self.didFinishPreparingForSharing()
+            switch output {
+            case .store:
+                let contents = try prepareStoreForSharing(store: store, context: context, directory: directory, predicate: predicate)
+                DispatchQueue.main.async {
+                    self.sharedContents = contents
+                    self.didFinishPreparingForSharing()
+                }
+            case .text, .html:
+                let output: ShareOutput = output == .text ? .plainText : .html
+                prepareForSharing(predicate: predicate, context: context, output: output) { contents in
+                    DispatchQueue.main.async {
+                        self.sharedContents = contents
+                        self.didFinishPreparingForSharing()
+                    }
+                }
             }
+
         } catch {
             directory.remove()
             DispatchQueue.main.async {
@@ -227,27 +253,27 @@ private final class ShareStoreViewModel: ObservableObject {
         }
     }
 
-    private func prepareForSharing(store: LoggerStore, context: NSManagedObjectContext, directory: TemporaryDirectory, predicate: NSPredicate?) throws -> SharedContents {
-        let logsURL: URL
-        var info: LoggerStore.Info?
-        switch output {
-        case .store:
-            logsURL = directory.url.appendingPathComponent("logs-\(makeCurrentDate()).pulse")
-            if let predicate = predicate {
-                info = try store.copy(to: logsURL, predicate: predicate)
-            } else {
-                info = try store.copy(to: logsURL)
-            }
-        case .text:
-            let request = NSFetchRequest<LoggerMessageEntity>(entityName: "\(LoggerMessageEntity.self)")
-            request.predicate = predicate
-            let messages: [LoggerMessageEntity] = try context.fetch(request)
-            let text = ConsoleShareService.format(messages)
-            logsURL = directory.url.appendingPathComponent("logs-\(makeCurrentDate()).txt")
-            try text.data(using: .utf8)?.write(to: logsURL)
+    private func prepareStoreForSharing(store: LoggerStore, context: NSManagedObjectContext, directory: TemporaryDirectory, predicate: NSPredicate?) throws -> SharedContents {
+        let logsURL = directory.url.appendingPathComponent("logs-\(makeCurrentDate()).\(output.fileExtension)")
+        let info: LoggerStore.Info?
+        if let predicate = predicate {
+            info = try store.copy(to: logsURL, predicate: predicate)
+        } else {
+            info = try store.copy(to: logsURL)
         }
         let item = ShareItems([logsURL], cleanup: directory.remove)
         return SharedContents(item: item, size: try logsURL.getFileSize(), info: info)
+    }
+
+    private func prepareForSharing(predicate: NSPredicate?, context: NSManagedObjectContext, output: ShareOutput, _ completion: @escaping (SharedContents) -> Void) {
+        let request = NSFetchRequest<LoggerMessageEntity>(entityName: "\(LoggerMessageEntity.self)")
+        request.predicate = predicate
+        let messages = (try? context.fetch(request)) ?? []
+
+        ShareStoreTask(entities: messages, store: store!, output: output) { item in
+            guard let item = item else { return }
+            completion(SharedContents(item: item, size: item.size))
+        }.start()
     }
 }
 
@@ -260,23 +286,15 @@ private extension URL {
 
 private struct SharedContents {
     var item: ShareItems?
-    var size: Int64 = 0
+    var size: Int64?
     var info: LoggerStore.Info?
 
-    var formattedFileSize: String {
-        ByteCountFormatter.string(fromByteCount: size)
+    var formattedFileSize: String? {
+        size.map(ByteCountFormatter.string)
     }
 }
 
-private enum TimeRange: String, CaseIterable {
-    case currentSession = "Current Session"
-    case lastHour = "Last Hour"
-    case today = "Today"
-    case all = "All Messages"
-}
-
 #if DEBUG
-@available(iOS 14.0, tvOS 14.0, *)
 struct ShareStoreView_Previews: PreviewProvider {
     static var previews: some View {
 #if os(iOS)
@@ -292,3 +310,10 @@ struct ShareStoreView_Previews: PreviewProvider {
 #endif
 
 #endif
+
+enum SharingTimeRange: String, CaseIterable, RawRepresentable {
+    case currentSession = "This Session"
+    case lastHour = "Last Hour"
+    case today = "Today"
+    case all = "All Messages"
+}

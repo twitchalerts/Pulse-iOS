@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import CoreData
 import Pulse
@@ -8,58 +8,97 @@ import Combine
 import SwiftUI
 
 final class ConsoleViewModel: NSObject, NSFetchedResultsControllerDelegate, ObservableObject {
+    let title: String
+    let isNetworkOnly: Bool
+    let store: LoggerStore
+
 #if os(iOS) || os(macOS)
     let table: ConsoleTableViewModel
-#endif
-    @Published private(set) var entities: [LoggerMessageEntity] = []
-
     let details: ConsoleDetailsRouterViewModel
+#endif
 
-    // Search criteria
-    let searchCriteria: ConsoleSearchCriteriaViewModel
-    @Published var isOnlyErrors: Bool = false
-    @Published var isOnlyNetwork: Bool = false
+    @Published private(set) var entities: [NSManagedObject] = []
+    let entitiesSubject = CurrentValueSubject<[NSManagedObject], Never>([])
+
+#if os(iOS)
+    let insightsViewModel: InsightsViewModel
+#endif
+
+    let searchViewModel: ConsoleSearchViewModel
+
+    @Published var mode: Mode
+    @Published var isOnlyErrors = false
     @Published var filterTerm: String = ""
 
     var onDismiss: (() -> Void)?
 
-    private(set) var store: LoggerStore
-    private let controller: NSFetchedResultsController<LoggerMessageEntity>
+    private var controller: NSFetchedResultsController<NSManagedObject>?
     private var isActive = false
-    private var latestSessionId: UUID?
     private var cancellables: [AnyCancellable] = []
 
-    init(store: LoggerStore) {
+    enum Mode {
+        case messages, network
+    }
+
+    init(store: LoggerStore, mode: Mode = .messages) {
+        self.title = mode == .network ? "Network" : "Console"
         self.store = store
-        self.details = ConsoleDetailsRouterViewModel()
+        self.mode = mode
+        self.isNetworkOnly = mode == .network
 
-        let request = NSFetchRequest<LoggerMessageEntity>(entityName: "\(LoggerMessageEntity.self)")
-        request.fetchBatchSize = 100
-        request.relationshipKeyPathsForPrefetching = ["request"]
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \LoggerMessageEntity.createdAt, ascending: false)]
+        self.searchViewModel = ConsoleSearchViewModel(store: store, entities: entitiesSubject)
 
-        self.controller = NSFetchedResultsController<LoggerMessageEntity>(fetchRequest: request, managedObjectContext: store.viewContext, sectionNameKeyPath: nil, cacheName: nil)
-
-        self.searchCriteria = ConsoleSearchCriteriaViewModel(store: store)
 #if os(iOS) || os(macOS)
-        self.table = ConsoleTableViewModel(searchCriteriaViewModel: searchCriteria)
+        self.details = ConsoleDetailsRouterViewModel()
+        self.table = ConsoleTableViewModel(searchViewModel: searchViewModel)
+#endif
+
+#if os(iOS)
+        self.insightsViewModel = InsightsViewModel(store: store)
 #endif
 
         super.init()
 
-        controller.delegate = self
-
-        $filterTerm.throttle(for: 0.25, scheduler: RunLoop.main, latest: true).dropFirst().sink { [weak self] filterTerm in
-            self?.refresh(filterTerm: filterTerm)
+        $entities.sink { [entitiesSubject] in
+            entitiesSubject.send($0)
         }.store(in: &cancellables)
 
-        searchCriteria.dataNeedsReload.throttle(for: 0.5, scheduler: DispatchQueue.main, latest: true).sink { [weak self] in
-            self?.refreshNow()
-        }.store(in: &cancellables)
+        $filterTerm
+            .dropFirst()
+            .throttle(for: 0.25, scheduler: RunLoop.main, latest: true)
+            .sink { [weak self] filterTerm in
+                self?.refresh(filterTerm: filterTerm)
+            }.store(in: &cancellables)
+
+        searchViewModel.$criteria
+            .dropFirst()
+            .throttle(for: 0.5, scheduler: DispatchQueue.main, latest: true)
+            .sink { [weak self] _ in self?.refreshNow() }
+            .store(in: &cancellables)
 
         $isOnlyErrors.receive(on: DispatchQueue.main).dropFirst().sink { [weak self] _ in
             self?.refreshNow()
         }.store(in: &cancellables)
+
+        prepare(for: mode)
+    }
+
+    // MARK: Mode
+
+    func toggleMode() {
+        switch mode {
+        case .messages: mode = .network
+        case .network: mode = .messages
+        }
+        prepare(for: mode)
+    }
+
+    private func prepare(for mode: Mode) {
+        searchViewModel.mode = mode
+
+        let request = makeFetchRequest(for: mode)
+        controller = NSFetchedResultsController(fetchRequest: request, managedObjectContext: store.viewContext, sectionNameKeyPath: nil, cacheName: nil)
+        controller?.delegate = self
 
         refreshNow()
     }
@@ -82,14 +121,16 @@ final class ConsoleViewModel: NSObject, NSFetchedResultsControllerDelegate, Obse
     }
 
     private func refresh(filterTerm: String) {
-        // Get sessionId
-        if latestSessionId == nil {
-            latestSessionId = entities.first?.session
-        }
-        let sessionId = store === LoggerStore.shared ? LoggerStore.Session.current.id : latestSessionId
-
         // Search messages
-        ConsoleSearchCriteria.update(request: controller.fetchRequest, filterTerm: filterTerm, criteria: searchCriteria.criteria, filters: searchCriteria.filters, sessionId: sessionId, isOnlyErrors: isOnlyErrors, isOnlyNetwork: isOnlyNetwork)
+        guard let controller = controller else {
+            return assertionFailure()
+        }
+        switch mode {
+        case .messages:
+            controller.fetchRequest.predicate = ConsoleSearchCriteria.makeMessagePredicates(criteria: searchViewModel.criteria, isOnlyErrors: isOnlyErrors, filterTerm: filterTerm)
+        case .network:
+            controller.fetchRequest.predicate = ConsoleSearchCriteria.makeNetworkPredicates(criteria: searchViewModel.criteria, isOnlyErrors: isOnlyErrors, filterTerm: filterTerm)
+        }
         try? controller.performFetch()
 
         reloadMessages()
@@ -109,9 +150,30 @@ final class ConsoleViewModel: NSObject, NSFetchedResultsControllerDelegate, Obse
     }
 
     private func reloadMessages() {
-        entities = controller.fetchedObjects ?? []
+        entities = controller?.fetchedObjects ?? []
 #if os(iOS) || os(macOS)
         table.entities = entities
 #endif
     }
+
+    // MARK: - Sharing
+
+    func prepareForSharing(as output: ShareOutput, _ completion: @escaping (ShareItems?) -> Void) {
+        ShareService.share(entities, store: store, as: output, completion)
+    }
+}
+
+private func makeFetchRequest(for mode: ConsoleViewModel.Mode) -> NSFetchRequest<NSManagedObject> {
+    let request: NSFetchRequest<NSManagedObject>
+    switch mode {
+    case .messages:
+        request = .init(entityName: "\(LoggerMessageEntity.self)")
+        request.relationshipKeyPathsForPrefetching = ["request"]
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \LoggerMessageEntity.createdAt, ascending: false)]
+    case .network:
+        request = .init(entityName: "\(NetworkTaskEntity.self)")
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \NetworkTaskEntity.createdAt, ascending: false)]
+    }
+    request.fetchBatchSize = 100
+    return request
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1400"
+   LastUpgradeVersion = "1420"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "Pulse"
-               BuildableName = "Pulse"
+               BlueprintIdentifier = "0CF0D541296F14EA00EED9D4"
+               BuildableName = "Pulse.framework"
                BlueprintName = "Pulse"
-               ReferencedContainer = "container:">
+               ReferencedContainer = "container:Pulse.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "PulseTests"
-               BuildableName = "PulseTests"
+               BlueprintIdentifier = "0CF0D68E296F18BE00EED9D4"
+               BuildableName = "PulseTests.xctest"
                BlueprintName = "PulseTests"
-               ReferencedContainer = "container:">
+               ReferencedContainer = "container:Pulse.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -50,12 +50,6 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <CommandLineArguments>
-         <CommandLineArgument
-            argument = "-com.apple.CoreData.SQLDebug 4"
-            isEnabled = "NO">
-         </CommandLineArgument>
-      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -66,10 +60,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "Pulse"
-            BuildableName = "Pulse"
+            BlueprintIdentifier = "0CF0D541296F14EA00EED9D4"
+            BuildableName = "Pulse.framework"
             BlueprintName = "Pulse"
-            ReferencedContainer = "container:">
+            ReferencedContainer = "container:Pulse.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

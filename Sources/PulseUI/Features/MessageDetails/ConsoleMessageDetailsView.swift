@@ -1,42 +1,30 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import SwiftUI
 import Pulse
 
 struct ConsoleMessageDetailsView: View {
     let viewModel: ConsoleMessageDetailsViewModel
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
-    @State private var isShowingShareSheet = false
-    var onClose: (() -> Void)?
 
-    #if os(iOS)
+#if os(iOS)
     var body: some View {
         contents
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarItems(trailing: trailingNavigationBarItems)
-            .sheet(isPresented: $isShowingShareSheet) {
-                ShareView(activityItems: [self.viewModel.prepareForSharing()])
-            }
     }
 
     @ViewBuilder
     private var trailingNavigationBarItems: some View {
         HStack(spacing: 10) {
-            if let badge = viewModel.badge {
-                BadgeView(viewModel: BadgeViewModel(title: badge.title, color: badge.color.opacity(colorScheme == .light ? 0.25 : 0.5)))
-            }
             NavigationLink(destination: ConsoleMessageMetadataView(message: viewModel.message)) {
                 Image(systemName: "info.circle")
             }
             PinButton(viewModel: viewModel.pin, isTextNeeded: false)
-            ShareButton {
-                self.isShowingShareSheet = true
-            }
         }
     }
-    #elseif os(watchOS)
+#elseif os(watchOS)
     var body: some View {
         ScrollView {
             VStack(spacing: 8) {
@@ -47,50 +35,24 @@ struct ConsoleMessageDetailsView: View {
             }
         }
     }
-    #elseif os(tvOS)
+#elseif os(tvOS)
     var body: some View {
         contents
     }
-    #elseif os(macOS)
-    @State var isMetaVisible = false
+#elseif os(macOS)
+    @State private var isDetailsLinkActive = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                Button(action: { isMetaVisible = true }) {
-                    Image(systemName: "info.circle")
-                }.padding(.leading, 4)
-                if let badge = viewModel.badge {
-                    BadgeView(viewModel: BadgeViewModel(title: badge.title, color: badge.color.opacity(colorScheme == .light ? 0.25 : 0.5)))
-                }
-                Spacer()
-                if let onClose = onClose {
-                    Button(action: onClose) {
-                        Image(systemName: "xmark").foregroundColor(.secondary)
-                    }.buttonStyle(.plain)
+        ConsoleMessageMetadataView(message: viewModel.message)
+            .background(InvisibleNavigationLinks {
+                NavigationLink.programmatic(isActive: $isDetailsLinkActive) {
+                    _MessageTextView(viewModel: viewModel)
                 }
             }
-            .padding([.leading, .trailing], 6)
-            .frame(height: 27, alignment: .center)
-            Divider()
-            textView
-                .background(colorScheme == .dark ? Color(NSColor(red: 30/255.0, green: 30/255.0, blue: 30/255.0, alpha: 1)) : .clear)
-        }
-        .sheet(isPresented: $isMetaVisible, content: {
-            VStack(spacing: 0) {
-                HStack {
-                    Text("Message Details")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Button("Close") { isMetaVisible = false }
-                        .keyboardShortcut(.cancelAction)
-                }.padding()
-                ConsoleMessageMetadataView(message: viewModel.message)
-            }.frame(width: 440, height: 600)
-        })
+            )
+            .onAppear { isDetailsLinkActive = true }
     }
-    #endif
+#endif
 
     private var contents: some View {
         VStack {
@@ -102,12 +64,9 @@ struct ConsoleMessageDetailsView: View {
         RichTextView(viewModel: viewModel.textViewModel)
     }
 
-    #if os(watchOS) || os(tvOS)
+#if os(watchOS) || os(tvOS)
     private var tags: some View {
         VStack(alignment: .leading) {
-            if let badge = viewModel.badge {
-                BadgeView(viewModel: BadgeViewModel(title: badge.title, color: badge.color.opacity(colorScheme == .light ? 0.25 : 0.5)))
-            }
             ForEach(viewModel.tags, id: \.title) { tag in
                 HStack {
                     Text(tag.title)
@@ -124,14 +83,27 @@ struct ConsoleMessageDetailsView: View {
         .background(Color.gray.opacity(0.15))
         .cornerRadius(8)
     }
-    #endif
+#endif
 }
+
+#if os(macOS)
+
+private struct _MessageTextView: View {
+    let viewModel: ConsoleMessageDetailsViewModel
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    @State private var isShowingShareSheet = false
+
+    var body: some View {
+        RichTextView(viewModel: viewModel.textViewModel)
+    }
+}
+#endif
 
 #if DEBUG
 struct ConsoleMessageDetailsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ConsoleMessageDetailsView(viewModel: .init(message: makeMockMessage()), onClose: {})
+            ConsoleMessageDetailsView(viewModel: .init(message: makeMockMessage()))
         }
     }
 }

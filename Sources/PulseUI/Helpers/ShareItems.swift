@@ -1,94 +1,116 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import Foundation
 import Pulse
 import CoreData
 
-#if os(iOS) || os(macOS)
+enum ShareStoreOutput: String, RawRepresentable {
+    case store, text, html
 
-enum ShareStoreOutput {
-    case store, text
+    var fileExtension: String {
+        switch self {
+        case .store: return "pulse"
+        case .text: return "txt"
+        case .html: return "html"
+        }
+    }
 }
 
 struct ShareItems: Identifiable {
     let id = UUID()
     let items: [Any]
+    let size: Int64?
     let cleanup: () -> Void
 
-    init(_ items: [Any], cleanup: @escaping () -> Void = { }) {
+    init(_ items: [Any], size: Int64? = nil, cleanup: @escaping () -> Void = { }) {
         self.items = items
+        self.size = size
         self.cleanup = cleanup
     }
 }
 
-extension ShareItems {
-    init(messages store: LoggerStore) {
-        let messages = (try? store.allMessages()) ?? []
-        let text = ConsoleShareService.format(messages)
-        self.init([text])
-    }
-}
+enum ShareService {
+    private static var task: ShareStoreTask?
 
-enum ConsoleShareService {
-    static func format(_ messages: [LoggerMessageEntity]) -> String {
-        var output = ""
-        for message in messages {
-            output.append(format(message: message))
-            output.append("\n")
+    static func share(_ entities: [NSManagedObject], store: LoggerStore, as output: ShareOutput, _ completion: @escaping (ShareItems?) -> Void) {
+        ShareStoreTask(entities: entities, store: store, output: output, completion: completion).start()
+    }
+
+    static func share(_ message: LoggerMessageEntity, as output: ShareOutput) -> ShareItems {
+        let string = TextRenderer(options: .sharing).make { $0.render(message) }
+        return share(string, as: output)
+    }
+
+    static func share(_ task: NetworkTaskEntity, as output: ShareOutput) -> ShareItems {
+        let string = TextRenderer(options: .sharing).make { $0.render(task, content: .sharing) }
+        return share(string, as: output)
+    }
+
+    static func share(_ string: NSAttributedString, as output: ShareOutput) -> ShareItems {
+        let string = sanitized(string, as: output)
+        switch output {
+        case .plainText:
+            let string = TextUtilities.plainText(from: string)
+            return ShareItems([string])
+        case .html:
+            let html = (try? TextUtilities.html(from: string)) ?? Data()
+            let directory = TemporaryDirectory()
+            let fileURL = directory.write(data: html, extension: "html")
+            return ShareItems([fileURL], size: Int64(html.count), cleanup: directory.remove)
+        case .pdf:
+#if os(iOS)
+            let pdf = (try? TextUtilities.pdf(from: string)) ?? Data()
+            let directory = TemporaryDirectory()
+            let fileURL = directory.write(data: pdf, extension: "pdf")
+            return ShareItems([fileURL], size: Int64(pdf.count), cleanup: directory.remove)
+#else
+            return ShareItems(["Sharing as PDF is not supported on this platform"])
+#endif
+        }
+    }
+
+    static func sanitized(_ string: NSAttributedString, as shareOutput: ShareOutput) -> NSAttributedString {
+        var ranges: [NSRange] = []
+        string.enumerateAttribute(.isTechnical, in: NSRange(location: 0, length: string.length)) { value, range, _ in
+            if (value as? Bool) == true {
+                ranges.append(range)
+            }
+        }
+        let output = NSMutableAttributedString(attributedString: string)
+        for range in ranges.reversed() {
+            output.deleteCharacters(in: range)
+        }
+        if shareOutput == .plainText {
+            var ranges: [NSRange] = []
+            string.enumerateAttribute(.subheadline, in: NSRange(location: 0, length: string.length)) { value, range, _ in
+                if (value as? Bool) == true {
+                    ranges.append(range)
+                }
+            }
+            for range in ranges.reversed() {
+                output.insert(NSAttributedString(string: "–––––––––––––––––––––––––––––––––––––––\n"), at: range.upperBound)
+                output.insert(NSAttributedString(string: ""), at: range.location)
+            }
         }
         return output
     }
-
-    private static func format(message: LoggerMessageEntity) -> String {
-        let title = "\(dateFormatter.string(from: message.createdAt)) [\(message.level)]-[\(message.label)] \(message.text)"
-        if let task = message.task {
-            return title + "\n\n" + share(task, output: .plainText)
-        } else {
-            return title
-        }
-    }
-
-    static func share(_ messages: [LoggerMessageEntity]) -> ShareItems {
-        let tempDir = TemporaryDirectory()
-        let allLogsUrl = tempDir.url.appendingPathComponent("logs.txt")
-        let allLogs = format(messages).data(using: .utf8) ?? Data()
-        try? allLogs.write(to: allLogsUrl)
-        return ShareItems([allLogsUrl], cleanup: tempDir.remove)
-    }
-
-    static func share(_ message: LoggerMessageEntity) -> String {
-        if let task = message.task {
-            return share(task, output: .plainText) // this should never happen
-        } else {
-            return message.text
-        }
-    }
-
-    static func share(_ task: NetworkTaskEntity, output: NetworkMessageRenderType) -> String {
-        switch output {
-        case .plainText: return Render.asPlainText(task: task)
-        case .markdown: return Render.asMarkdown(task: task)
-        case .html: return Render.asHTML(task: task)
-        }
-    }
 }
 
-enum NetworkMessageRenderType {
+enum ShareOutput {
     case plainText
-    case markdown
     case html
+    case pdf
+
+    var title: String {
+        switch self {
+        case .plainText: return "Text"
+        case .html: return "HTML"
+        case .pdf: return "PDF"
+        }
+    }
 }
-
-private let dateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.locale = Locale(identifier: "en_US")
-    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSSS"
-    return formatter
-}()
-
-#endif
 
 struct TemporaryDirectory {
     let url: URL
@@ -105,20 +127,36 @@ struct TemporaryDirectory {
     }
 }
 
-#if os(iOS) || os(macOS)
 extension TemporaryDirectory {
     func write(text: String, extension fileExtension: String) -> URL {
+        write(data: text.data(using: .utf8) ?? Data(), extension: fileExtension)
+    }
+
+    func write(data: Data, extension fileExtension: String) -> URL {
         let date = makeCurrentDate()
         let fileURL = url.appendingPathComponent("logs-\(date).\(fileExtension)", isDirectory: false)
-        try? text.data(using: .utf8)?.write(to: fileURL)
+        try? data.write(to: fileURL)
         return fileURL
     }
 }
-#endif
 
 func makeCurrentDate() -> String {
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "en_US")
     formatter.dateFormat = "yyyy-MM-dd-HH-mm"
     return formatter.string(from: Date())
+}
+
+private extension LoggerStore.Level {
+    var title: String {
+        switch self {
+        case .trace: return "trace"
+        case .debug: return "debug"
+        case .info: return "info"
+        case .notice: return "notice"
+        case .warning: return "warning"
+        case .error: return "error"
+        case .critical: return "critical"
+        }
+    }
 }

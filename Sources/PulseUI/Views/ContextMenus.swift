@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import SwiftUI
 import Pulse
@@ -16,8 +16,7 @@ struct ButtonCopyMessage: View {
             UXPasteboard.general.string = text
             runHapticFeedback()
         }) {
-            Text("Copy Message")
-            Image(systemName: "doc.on.doc")
+            Label("Copy Message", systemImage: "doc.on.doc")
         }
     }
 }
@@ -28,60 +27,9 @@ struct NetworkMessageContextMenu: View {
     @Binding private(set) var sharedItems: ShareItems?
 
     var body: some View {
-        Section {
-            if #available(iOS 14.0, *) {
-                Menu("Share Request Log") {
-                    shareAsButtons
-                }
-            } else {
-                shareAsButtons
-            }
-            if task.responseBodySize > 0 {
-                Button(action: {
-                    sharedItems = ShareItems([task.responseBody?.data ?? Data()])
-                }) {
-                    Text("Share Response")
-                    Image(systemName: "square.and.arrow.up")
-                }
-            }
-        }
         NetworkMessageContextMenuCopySection(task: task)
         if let message = task.message {
             PinButton(viewModel: .init(message: message))
-        }
-    }
-
-    @ViewBuilder
-    private var shareAsButtons: some View {
-        Button(action: {
-            sharedItems = ShareItems([ConsoleShareService.share(task, output: .plainText)])
-        }) {
-            Text("Share as Plain Text")
-            Image(systemName: "square.and.arrow.up")
-        }
-        Button(action: {
-            let text = ConsoleShareService.share(task, output: .markdown)
-            let directory = TemporaryDirectory()
-            let fileURL = directory.write(text: text, extension: "markdown")
-            sharedItems = ShareItems([fileURL], cleanup: directory.remove)
-        }) {
-            Text("Share as Markdown")
-            Image(systemName: "square.and.arrow.up")
-        }
-        Button(action: {
-            let text = ConsoleShareService.share(task, output: .html)
-            let directory = TemporaryDirectory()
-            let fileURL = directory.write(text: text, extension: "html")
-            sharedItems = ShareItems([fileURL], cleanup: directory.remove)
-        }) {
-            Text("Share as HTML")
-            Image(systemName: "square.and.arrow.up")
-        }
-        Button(action: {
-            sharedItems = ShareItems([task.cURLDescription()])
-        }) {
-            Text("Share as cURL")
-            Image(systemName: "square.and.arrow.up")
         }
     }
 }
@@ -91,76 +39,73 @@ struct NetworkMessageContextMenuCopySection: View {
 
     var body: some View {
         Section {
-            if let url = task.url {
-                Button(action: {
-                    UXPasteboard.general.string = url
-                    runHapticFeedback()
-                }) {
-                    Text("Copy URL")
-                    Image(systemName: "doc.on.doc")
+            Menu(content: {
+                if let url = task.url {
+                    Button(action: {
+                        UXPasteboard.general.string = url
+                        runHapticFeedback()
+                    }) {
+                        Label("Copy URL", systemImage: "doc.on.doc")
+                    }
                 }
-            }
-            if let host = task.host?.value {
-                Button(action: {
-                    UXPasteboard.general.string = host
-                    runHapticFeedback()
-                }) {
-                    Text("Copy Host")
-                    Image(systemName: "doc.on.doc")
+                if let host = task.host?.value {
+                    Button(action: {
+                        UXPasteboard.general.string = host
+                        runHapticFeedback()
+                    }) {
+                        Label("Copy Host", systemImage: "doc.on.doc")
+                    }
                 }
-            }
-            if task.responseBodySize > 0 {
-                Button(action: {
-                    guard let data = task.responseBody?.data else { return }
-                    UXPasteboard.general.string = String(data: data, encoding: .utf8)
-                    runHapticFeedback()
-                }) {
-                    Text("Copy Response")
-                    Image(systemName: "doc.on.doc")
+                if task.requestBodySize > 0 {
+                    Button(action: {
+                        guard let data = task.requestBody?.data else { return }
+                        UXPasteboard.general.string = String(data: data, encoding: .utf8)
+                        runHapticFeedback()
+                    }) {
+                        Label("Copy Request", systemImage:"arrow.up.circle")
+                    }
                 }
-            }
+                if task.responseBodySize > 0 {
+                    Button(action: {
+                        guard let data = task.responseBody?.data else { return }
+                        UXPasteboard.general.string = String(data: data, encoding: .utf8)
+                        runHapticFeedback()
+                    }) {
+                        Label("Copy Response", systemImage: "arrow.down.circle")
+                    }
+                }
+            }, label: {
+                Label("Copy...", systemImage: "doc.on.doc")
+            })
         }
     }
 }
 #endif
 
 #if os(iOS) || os(macOS)
-@available(iOS 14.0, *)
 struct StringSearchOptionsMenu: View {
     @Binding private(set) var options: StringSearchOptions
     var isKindNeeded = true
 
-    #if os(macOS)
+#if os(macOS)
     var body: some View {
-        Menu(content: {
-            pickerCase
-            pickerKind
-            pickerOptions
-        }, label: {
+        Menu(content: { contents }, label: {
             Image(systemName: "ellipsis.circle")
         })
-        .menuStyle(BorderlessButtonMenuStyle(showsMenuIndicator: false))
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
     }
-    #else
+#else
     var body: some View {
-        pickerCase
-        pickerKind
+        contents
+    }
+#endif
+
+    @ViewBuilder
+    private var contents: some View {
+        Toggle("Regular Expression", isOn: $options.isRegex)
+        Toggle("Case Sensitive", isOn: $options.isCaseSensitive)
         pickerOptions
-    }
-    #endif
-
-    var pickerCase: some View {
-        Picker(options.isCaseSensitive ? "Case Sensitive" :  "Case Insensitive", selection: $options.isCaseSensitive) {
-            Text("Case Sensitive").tag(true)
-            Text("Case Insensitive").tag(false)
-        }.pickerStyle(.inline)
-    }
-
-    var pickerKind: some View {
-        Picker(options.isRegex ? "Regular Expression" : "Text", selection: $options.isRegex) {
-            Text("Text").tag(false)
-            Text("Regular Expression").tag(true)
-        }.pickerStyle(.inline)
     }
 
     @ViewBuilder
@@ -170,8 +115,53 @@ struct StringSearchOptionsMenu: View {
                 ForEach(StringSearchOptions.Kind.allCases, id: \.self) {
                     Text($0.rawValue).tag($0)
                 }
-            }.pickerStyle(.inline)
+            }
+            .pickerStyle(.menu)
         }
     }
 }
+
+struct AttributedStringShareMenu: View {
+    @Binding var shareItems: ShareItems?
+    let string: () -> NSAttributedString
+
+    var body: some View {
+        Button(action: { shareItems = ShareService.share(string(), as: .plainText) }) {
+            Label("Share as Text", systemImage: "square.and.arrow.up")
+        }
+        Button(action: { shareItems = ShareService.share(string(), as: .html) }) {
+            Label("Share as HTML", systemImage: "square.and.arrow.up")
+        }
+#if os(iOS)
+        Button(action: { shareItems = ShareService.share(string(), as: .pdf) }) {
+            Label("Share as PDF", systemImage: "square.and.arrow.up")
+        }
+#endif
+    }
+}
+
+#if DEBUG
+struct StringSearchOptionsMenu_Previews: PreviewProvider {
+    static var previews: some View {
+        VStack(spacing: 32) {
+            Spacer()
+            Menu(content: {
+                AttributedStringShareMenu(shareItems: .constant(nil)) {
+                    TextRenderer(options: .sharing).make { $0.render(LoggerStore.preview.entity(for: .login), content: .sharing) }
+                }
+            }) {
+                Text("Attributed String Share")
+            }
+            Menu(content: {
+                Section(header: Label("Search Options", systemImage: "magnifyingglass")) {
+                    StringSearchOptionsMenu(options: .constant(.default))
+                }
+            }) {
+                Text("Search Options")
+            }
+        }
+    }
+}
+#endif
+
 #endif

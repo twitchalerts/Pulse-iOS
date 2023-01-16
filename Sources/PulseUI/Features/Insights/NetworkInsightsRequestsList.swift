@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import SwiftUI
 import CoreData
@@ -26,7 +26,7 @@ final class NetworkInsightsRequestsListViewModel: ObservableObject {
     let details: ConsoleDetailsRouterViewModel
 
     init(tasks: [NetworkTaskEntity]) {
-        self.table = ConsoleTableViewModel(searchCriteriaViewModel: nil)
+        self.table = ConsoleTableViewModel(searchViewModel: nil)
         self.table.entities = tasks
         self.details = ConsoleDetailsRouterViewModel()
     }

@@ -4,11 +4,21 @@ A set of components that you can integrate into your app to view the logs.
 
 ## Overview
 
-The easiest way to integrate PulseUI is by using ``MainView`` (for SwiftUI) or ``MainViewController`` (for UIKit).
+The easiest way to integrate PulseUI is by using ``ConsoleView``.
 
-![A sloth hanging off a tree.](pulseui-main.png)
+```swift
+// On iOS
+.sheet(isPresented: $isConsolePresented) {
+    NavigationView {
+        ConsoleView()
+            .navigationBarItems(leading: Button("Close") {
+                isConsolePresented = false
+            })
+    }
+}
+```
 
-In addition to ``MainView``, you can also show individual tabs. For example, if you have an existing debug menu and 
+Alternatively, you can use native `UIHostingController` to present it in any `UIKit` context.
 
 ## Custom Views
 
@@ -39,15 +49,14 @@ private let timeFormatter = DateFormatter(format: "HH:mm:ss.SSS")
 
 ## Topics
 
-### Main View
-
-- ``MainView``
-- ``MainViewController``
-
-### Individual Tabs
+### Main Views
 
 - ``ConsoleView``
+- ``SettingsView``
+
+### Deprecated
+
+- ``MainViewController``
+- ``MainView``
 - ``NetworkView``
 - ``PinsView``
-- ``InsightsView``
-- ``SettingsView``

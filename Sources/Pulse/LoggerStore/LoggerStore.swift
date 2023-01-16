@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020–2022 Alexander Grebenyuk (github.com/kean).
+// Copyright (c) 2020–2023 Alexander Grebenyuk (github.com/kean).
 
 import Foundation
 import CoreData
@@ -30,10 +30,6 @@ public final class LoggerStore: @unchecked Sendable {
     /// Returns the background managed object context used for all write operations.
     public let backgroundContext: NSManagedObjectContext
 
-    // Deprecated in Pulse 2.0.
-    @available(*, deprecated, message: "Renamed to `shared`")
-    public static var `default`: LoggerStore { LoggerStore.shared }
-
     /// Re-transmits events processed by the store.
     public let events = PassthroughSubject<Event, Never>()
 
@@ -51,6 +47,9 @@ public final class LoggerStore: @unchecked Sendable {
     private var requestsCache: [NetworkLogger.Request: NetworkRequestEntity] = [:]
     private var responsesCache: [NetworkLogger.Response: NetworkResponseEntity] = [:]
 
+    /// The date one of the loggers was created.
+    public static let launchDate = Date()
+
     // MARK: Shared
 
     /// Returns a shared store.
@@ -63,9 +62,7 @@ public final class LoggerStore: @unchecked Sendable {
     }
 
     private static func register(store: LoggerStore) {
-        if #available(iOS 14.0, tvOS 14.0, *) {
-            RemoteLogger.shared.initialize(store: store)
-        }
+        RemoteLogger.shared.initialize(store: store)
         NetworkLoggerInsights.shared.register(store: store)
     }
 
@@ -164,6 +161,8 @@ public final class LoggerStore: @unchecked Sendable {
     }
 
     private func postInitialization() throws {
+        _ = LoggerStore.launchDate
+
         backgroundContext.performAndWait {
             self.backgroundContext.userInfo[WeakLoggerStore.loggerStoreKey] = WeakLoggerStore(store: self)
         }
@@ -331,10 +330,9 @@ extension LoggerStore {
         entity.url = event.originalRequest.url?.absoluteString
         entity.host = event.originalRequest.url?.host.map(makeDomain)
         entity.httpMethod = event.originalRequest.httpMethod
-        let statusCode = Int32(event.response?.statusCode ?? 0)
-        entity.statusCode = statusCode
+        entity.statusCode = Int32(event.response?.statusCode ?? 0)
         entity.responseContentType = event.response?.contentType?.type
-        let isFailure = event.error != nil || (statusCode != 0 && !(200..<400).contains(statusCode))
+        let isFailure = event.error != nil || event.response?.isSuccess == false
         entity.requestState = (isFailure ? NetworkTaskEntity.State.failure : .success).rawValue
 
         // Populate response/request data
@@ -342,10 +340,10 @@ extension LoggerStore {
 
         if let requestBody = event.requestBody {
             let requestContentType = event.originalRequest.contentType
-            entity.requestBody = storeBlob(preprocessData(requestBody, contentType: requestContentType))
+            entity.requestBody = storeBlob(requestBody, contentType: requestContentType)
         }
         if let responseData = event.responseBody {
-            entity.responseBody = storeBlob(preprocessData(responseData, contentType: responseContentType))
+            entity.responseBody = storeBlob(responseData, contentType: responseContentType)
         }
 
         switch event.taskType {
@@ -556,7 +554,9 @@ extension LoggerStore {
 
     // MARK: - Managing Blobs
 
-    private func storeBlob(_ data: Data) -> LoggerBlobHandleEntity? {
+    private func storeBlob(_ data: Data, contentType: NetworkLogger.ContentType?) -> LoggerBlobHandleEntity? {
+        let data = preprocessData(data, contentType: contentType)
+
         guard !data.isEmpty else {
             return nil // Sanity check
         }
@@ -576,6 +576,7 @@ extension LoggerStore {
         let entity = LoggerBlobHandleEntity(context: backgroundContext)
         entity.key = key
         entity.linkCount = 1
+        entity.rawContentType = contentType?.rawValue
         // It's safe to use Int32 because we prevent larger values from being stored
         entity.size = Int32(compressedData.count)
         entity.decompressedSize = Int32(data.count)
@@ -602,11 +603,12 @@ extension LoggerStore {
     }
 
     func getDecompressedData(for entity: LoggerBlobHandleEntity) -> Data? {
-        getRawData(for: entity).flatMap(decompress)
+        getDecompressedData(for: entity.inlineData, key: entity.key)
     }
 
-    private func getRawData(for entity: LoggerBlobHandleEntity) -> Data? {
-        entity.inlineData ?? getRawData(forKey: entity.key.hexString)
+    func getDecompressedData(for inlineData: Data?, key: Data) -> Data? {
+        guard let data = inlineData ?? getRawData(forKey: key.hexString) else { return nil }
+        return decompress(data)
     }
 
     /// Returns blob data for the given key.
@@ -770,25 +772,22 @@ extension LoggerStore {
         let temporary = TemporaryDirectory()
         defer { temporary.remove() }
 
-        let document = try PulseDocument(documentURL: targetURL)
-        var totalSize: Int64 = 0
-
         // Create copy of the store
         let databaseURL = temporary.url.appending(filename: databaseFilename)
         try container.persistentStoreCoordinator.createCopyOfStore(at: databaseURL)
 
+        var info = try _info()
+
         // Remove unwanted messages
         if let predicate = predicate {
             try Files.copyItem(at: manifestURL, to: temporary.url.appending(filename: manifestFilename)) // Important
-            let store = try LoggerStore(storeURL: temporary.url)
-            defer { try? store.close() }
-            try store.backgroundContext.performAndReturn {
-                try store.removeMessages(with:  NSCompoundPredicate(notPredicateWithSubpredicate: predicate))
-                try store.backgroundContext.save()
-            }
+            info = try removeMessages(with: predicate, at: temporary.url)
         }
 
-        let info: Info = try document.context.performAndReturn {
+        let document = try PulseDocument(documentURL: targetURL)
+        var totalSize: Int64 = 0
+
+        return try document.context.performAndReturn {
             // Add database
             let documentBlob = PulseBlobEntity(context: document.context)
             documentBlob.key = "database"
@@ -811,7 +810,6 @@ extension LoggerStore {
             }
 
             // Add store info
-            var info = try _info()
             info.storeId = UUID()
             // Chicken and an egg problem: don't know the exact size.
             // The output file is also going to be about 10-20% larger because of
@@ -829,8 +827,17 @@ extension LoggerStore {
 
             return info
         }
+    }
 
-        return info
+    /// Temporary open the store, remove message, and close it.
+    private func removeMessages(with predicate: NSPredicate, at targetURL: URL) throws -> Info {
+        let store = try LoggerStore(storeURL: targetURL)
+        defer { try? store.close() }
+        return try store.backgroundContext.performAndReturn {
+            try store.removeMessages(with:  NSCompoundPredicate(notPredicateWithSubpredicate: predicate))
+            try store.backgroundContext.save()
+            return try store._info()
+        }
     }
 }
 

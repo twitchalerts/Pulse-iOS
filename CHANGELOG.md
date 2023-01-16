@@ -1,5 +1,54 @@
 # Pulse 2.x
 
+## Pulse 3.1.0
+
+*Jan 14, 2023*
+
+- Update minimum requirements: Swift 5.7 | Xcode 14.0  | iOS 14.0, tvOS 14.0, watchOS 7.0, macOS 12.0
+- Add `ConsoleView.network` to other platforms (originally was available only on iOS)
+- Fix a couple of minor design issues
+- Fix missing live progress in Console for upload and download tasks
+
+### Filters
+
+- New [message](https://user-images.githubusercontent.com/1567433/212389395-2f60e425-cdc5-47ea-9185-52364ce9120c.png) and [network](https://user-images.githubusercontent.com/1567433/212389402-7c5c8f3e-cde2-4654-95e2-98a2844d7d89.png) filters design on macOS
+- Add search, expand/collapse, enable-all/disable-all buttons to labels and domains filters on all platforms
+- Add a missing "Remove Pins" button on macOS
+- Add a counter next to labels and domains
+- Display labels and domains only visible for the current filter
+- Fix an issue where when you were focusing a log label, it wasn't reflected in the filters
+- Fix an issue where using the "Recent" date filter was applying the "Session" filter instead
+
+### Sharing
+
+- Improve task to `NSAttributedString` generation speed by up to 7x faster. For multiple tasks, there is up to x3 improvement on top of that. And when converting multiple tasks with the same request or response body, you can see up to 90% faster exports. These optimizations affect everything: rendering response bodies, lists of messages, request headers, sharing (regardless of the output format), and more.
+- Improve HTML generation speed by 40% (not including `NSAttributedString` improvements that directly affect it)
+- Add a spinner while preparing a large file for sharing. You can still interact with the app while it's working. Note: it doesn't work with PDF because it has to be used on the main thread.
+- Add some [basic formatting](https://user-images.githubusercontent.com/1567433/212501275-1dae0ef8-ee4a-4d77-aa55-24b026e5d0cc.png)) for plain text output to make it easier to read
+- Fix double dot in shared files extensions
+- Remove share as .pdf from Console and TextView (keep in NetworkInspector) - too slow to be used for any reasonable amount of content
+
+## Pulse 3.0.0
+
+*Jan 10, 2023*
+
+### Pulse
+
+- Add `includedHosts`, `includedURLs`, `excludedHosts`, and `excludedURLs` to `NetworkLogger/Configuration`. By default, they support simple wildcards, e.g. `*.example.com`, but you can also enable full regex using another new configuration options: `isRegexEnabled`.
+- Add `sensitiveHeaders`, `sensitiveQueryItems`, `sensitiveDataFields` to `NetworkLogger/Configuration` for redacting sentitive information from logged HTTP headers 
+- Add a new convenience initializer to `NetworkLogger` with `configure` trailing closure
+- Make `LoggerStore.Event` frozen
+
+### PulseUI
+
+- A complete overhaul. See https://kean.blog/post/pulse-3 for more details.
+
+## Pulse 2.1.4
+
+*Dec 18, 2022*
+
+- Fix an issue with tabbar transparency (iOS 15 feature) not always working as expected
+
 ## Pulse 2.1.3
 
 *Sep 30, 2022*
