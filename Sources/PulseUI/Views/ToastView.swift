@@ -7,6 +7,7 @@
 import SwiftUI
 import Foundation
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ToastView<Content>: View where Content: View {
     let content: () -> Content
     var dismissDelay: TimeInterval = 3.0
@@ -32,12 +33,14 @@ struct ToastView<Content>: View where Content: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ToastView {
     func show() {
         ToastManager.shared.show(self)
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ToastManager {
     static let shared = ToastManager()
 
@@ -120,6 +123,7 @@ final class ToastManager {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private extension UIViewController {
     func topMostViewController() -> UIViewController {
         if self.presentedViewController == nil {
@@ -141,6 +145,7 @@ private extension UIViewController {
 
 #if DEBUG
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ToastView_Previews: PreviewProvider {
     static var previews: some View {
         ToastView {

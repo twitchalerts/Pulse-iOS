@@ -7,6 +7,8 @@ import Pulse
 
 #if DEBUG || PULSE_MOCK_INCLUDED
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct MockTask {
     var kind: Kind = .data
     let originalRequest: URLRequest
@@ -36,6 +38,7 @@ struct MockTask {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension MockTask {
     static let allEntities: [NetworkTaskEntity]  = MockTask.allTasks.map(LoggerStore.preview.entity)
 

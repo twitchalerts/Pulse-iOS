@@ -7,6 +7,8 @@ import Pulse
 
 // MARK: - View
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorMetricsView: View {
     let viewModel: NetworkInspectorMetricsViewModel
 
@@ -31,6 +33,7 @@ struct NetworkInspectorMetricsView: View {
 
 // MARK: - ViewModel
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class NetworkInspectorMetricsViewModel {
     private(set) lazy var transactions = task.orderedTransactions.map {
         NetworkInspectorTransactionViewModel(transaction: $0, task: task)
@@ -47,6 +50,7 @@ final class NetworkInspectorMetricsViewModel {
 // MARK: - Preview
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorMetricsView_Previews: PreviewProvider {
     static var previews: some View {
 #if os(macOS)

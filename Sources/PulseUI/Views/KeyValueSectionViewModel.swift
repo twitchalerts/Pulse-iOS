@@ -5,12 +5,14 @@
 import SwiftUI
 import Pulse
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct KeyValueSectionViewModel {
     var title: String
     var color: Color
     var items: [(String, String?)] = []
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension KeyValueSectionViewModel {
     static func makeParameters(for request: NetworkRequestEntity) -> KeyValueSectionViewModel {
         var items: [(String, String?)] = [

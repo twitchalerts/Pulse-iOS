@@ -9,6 +9,7 @@ import SwiftUI
 import Pulse
 import UniformTypeIdentifiers
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class DocumentBrowserViewController: UIDocumentPickerViewController, UIDocumentPickerDelegate, UIDocumentBrowserViewControllerDelegate {
 
     // This key is used to encode the bookmark data of the URL of the opened document as part of the state restoration data.

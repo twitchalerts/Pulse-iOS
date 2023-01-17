@@ -10,6 +10,7 @@ import Combine
 #if os(macOS) || os(iOS)
 
 // TODO: handle "Expand" and other custom actions using gesture recognizer and not URLs which are slow
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct RichTextView: View {
     let viewModel: RichTextViewModel
 
@@ -178,6 +179,7 @@ struct _RichTextView: View {
 }
 
 #if os(tvOS) || os(iOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct WrappedTextView: UIViewRepresentable {
     let viewModel: RichTextViewModel
 
@@ -227,6 +229,7 @@ struct WrappedTextView: UIViewRepresentable {
     }
 }
 #elseif os(macOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct WrappedTextView: NSViewRepresentable {
     let viewModel: RichTextViewModel
 
@@ -279,6 +282,7 @@ private func configureTextView(_ textView: UXTextView) {
 #endif
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func bind(_ viewModel: RichTextViewModel, _ textView: UXTextView) -> [AnyCancellable] {
     var cancellables: [AnyCancellable] = []
 
@@ -291,6 +295,7 @@ private func bind(_ viewModel: RichTextViewModel, _ textView: UXTextView) -> [An
 #endif
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct RichTextView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

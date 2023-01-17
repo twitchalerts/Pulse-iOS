@@ -6,6 +6,7 @@ import Foundation
 import SwiftUI
 
 /// Manages text attributes.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class TextHelper {
     private var cachedAttributes: [AttributesKey: [NSAttributedString.Key: Any]] = [:]
     private var cachedFonts: [TextStyle: UXFont] = [:]
@@ -113,6 +114,8 @@ final class TextHelper {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct TextStyle: Hashable {
     var role: TextRole
     var style: TextFontStyle = .proportional

@@ -9,6 +9,8 @@ import Combine
 
 #if os(watchOS) || os(tvOS) || os(macOS)
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleMessageView: View {
     let viewModel: ConsoleMessageViewModel
 
@@ -41,6 +43,7 @@ struct ConsoleMessageView: View {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleMessageView_Previews: PreviewProvider {
     static var previews: some View {
         ConsoleMessageView(viewModel: .init(message: (try!  LoggerStore.mock.allMessages())[0]))
@@ -50,6 +53,8 @@ struct ConsoleMessageView_Previews: PreviewProvider {
 }
 #endif
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleConstants {
 #if os(watchOS)
     static let fontTitle = Font.system(size: 14)

@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleSearchView: View {
     @ObservedObject var viewModel: ConsoleSearchViewModel
 
@@ -75,6 +77,7 @@ struct ConsoleSearchView: View {
 
 // MARK: - ConsoleSearchView (Shared)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleSearchView {
     var timePeriodSection: some View {
         ConsoleSearchSection(header: {
@@ -95,6 +98,7 @@ extension ConsoleSearchView {
 
 // MARK: - ConsoleSearchView (Message)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleSearchView {
 #if os(iOS) || os(macOS)
     @available(iOS 15, *)
@@ -134,6 +138,7 @@ extension ConsoleSearchView {
 
 // MARK: - ConsoleSearchView (Network)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleSearchView {
 #if os(iOS) || os(macOS)
     @available(iOS 15, *)
@@ -189,6 +194,8 @@ extension ConsoleSearchView {
 #if DEBUG
 import CoreData
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleSearchView_Previews: PreviewProvider {
     static var previews: some View {
 #if os(macOS)
@@ -219,6 +226,7 @@ struct ConsoleSearchView_Previews: PreviewProvider {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makePreview(mode: ConsoleViewModel.Mode) -> some View {
     let entities: [NSManagedObject]
     let store = LoggerStore.mock

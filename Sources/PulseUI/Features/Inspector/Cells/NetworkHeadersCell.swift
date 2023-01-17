@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkHeadersCell: View {
     let viewModel: NetworkHeadersCellViewModel
 
@@ -26,6 +28,7 @@ struct NetworkHeadersCell: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class NetworkHeadersCellViewModel {
     let title: String
     let details: String
@@ -45,6 +48,7 @@ final class NetworkHeadersCellViewModel {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkHeadersCell_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

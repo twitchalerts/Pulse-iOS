@@ -7,6 +7,8 @@ import Pulse
 
 // MARK: - View
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorTransferInfoView: View {
     let viewModel: NetworkInspectorTransferInfoViewModel
 
@@ -111,6 +113,7 @@ private let spacing: CGFloat? = nil
 // MARK: - Preview
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorTransferInfoView_Previews: PreviewProvider {
     static var previews: some View {
         NetworkInspectorTransferInfoView(viewModel: mockModel)
@@ -120,6 +123,7 @@ struct NetworkInspectorTransferInfoView_Previews: PreviewProvider {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private let mockModel = NetworkInspectorTransferInfoViewModel(
     task: LoggerStore.preview.entity(for: .login), taskType: .dataTask
 )
@@ -128,6 +132,8 @@ private let mockModel = NetworkInspectorTransferInfoViewModel(
 
 // MARK: - ViewModel
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorTransferInfoViewModel {
     let totalBytesSent: String
     let bodyBytesSent: String

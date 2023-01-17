@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkRequestInfoCell: View {
     let viewModel: NetworkRequestInfoCellViewModel
 
@@ -25,6 +27,7 @@ struct NetworkRequestInfoCell: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class NetworkRequestInfoCellViewModel {
     let httpMethod: String
     let url: String
@@ -46,6 +49,7 @@ final class NetworkRequestInfoCellViewModel {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkRequestInfoCell_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

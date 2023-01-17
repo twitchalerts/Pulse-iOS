@@ -13,6 +13,8 @@ import SwiftUI
 // A set of typealias and APIs to make AppKit and UIKit more
 // compatible with each other
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct Palette {
 #if os(watchOS)
     static var red: UXColor { UXColor(Color.red) }

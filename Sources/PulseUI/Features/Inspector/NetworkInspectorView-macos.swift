@@ -9,6 +9,8 @@ import Combine
 
 #if os(macOS)
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorView: View {
     @StateObject var viewModel: NetworkInspectorViewModel
 
@@ -52,6 +54,7 @@ struct NetworkInspectorView: View {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorView_Previews: PreviewProvider {
     static var previews: some View {
             if #available(macOS 13.0, *) {

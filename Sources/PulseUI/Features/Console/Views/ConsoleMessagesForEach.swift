@@ -9,6 +9,8 @@ import CoreData
 
 #if os(watchOS) || os(tvOS)
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleMessagesForEach: View {
     let messages: [NSManagedObject]
 
@@ -34,6 +36,7 @@ struct ConsoleMessagesForEach: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct NetworkRequestRow: View {
     let task: NetworkTaskEntity
 
@@ -45,6 +48,7 @@ private struct NetworkRequestRow: View {
 }
 
 // Create the underlying ViewModel lazily.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct LazyNetworkInspectorView: View {
     let task: NetworkTaskEntity
 
@@ -54,6 +58,7 @@ private struct LazyNetworkInspectorView: View {
 }
 
 // Create the underlying ViewModel lazily.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct LazyConsoleDetailsView: View {
     let message: LoggerMessageEntity
 

@@ -7,6 +7,8 @@ import Pulse
 import CoreData
 import Combine
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleSearchCriteria: Hashable {
     var shared = Shared()
     var messages = Messages()
@@ -36,6 +38,7 @@ protocol ConsoleFilterProtocol: Hashable {
     init() // Initializes with the default values
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleSearchCriteria {
     struct Dates: Hashable, ConsoleFilterProtocol {
         var isEnabled = true

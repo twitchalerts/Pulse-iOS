@@ -8,6 +8,7 @@ import Combine
 
 #if os(iOS) || os(macOS)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ButtonCopyMessage: View {
     let text: String
 
@@ -21,6 +22,7 @@ struct ButtonCopyMessage: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkMessageContextMenu: View {
     let task: NetworkTaskEntity
 
@@ -34,6 +36,7 @@ struct NetworkMessageContextMenu: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkMessageContextMenuCopySection: View {
     var task: NetworkTaskEntity
 
@@ -83,6 +86,7 @@ struct NetworkMessageContextMenuCopySection: View {
 #endif
 
 #if os(iOS) || os(macOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct StringSearchOptionsMenu: View {
     @Binding private(set) var options: StringSearchOptions
     var isKindNeeded = true
@@ -121,6 +125,7 @@ struct StringSearchOptionsMenu: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct AttributedStringShareMenu: View {
     @Binding var shareItems: ShareItems?
     let string: () -> NSAttributedString
@@ -141,6 +146,7 @@ struct AttributedStringShareMenu: View {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct StringSearchOptionsMenu_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 32) {

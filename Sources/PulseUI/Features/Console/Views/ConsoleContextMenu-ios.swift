@@ -11,6 +11,7 @@ import Combine
 
 import UniformTypeIdentifiers
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleContextMenu: View {
     let store: LoggerStore
     let insights: InsightsViewModel
@@ -128,6 +129,7 @@ struct ConsoleContextMenu: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct DocumentBrowser: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> DocumentBrowserViewController {
         DocumentBrowserViewController(forOpeningContentTypes: [UTType(filenameExtension: "pulse")].compactMap { $0 })
@@ -139,6 +141,7 @@ private struct DocumentBrowser: UIViewControllerRepresentable {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleContextMenu_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

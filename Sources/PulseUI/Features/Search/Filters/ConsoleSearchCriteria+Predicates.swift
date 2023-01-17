@@ -6,6 +6,7 @@ import Foundation
 import Pulse
 import CoreData
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleSearchCriteria {
     static func makeMessagePredicates(
         criteria: ConsoleSearchCriteria,
@@ -42,6 +43,7 @@ extension ConsoleSearchCriteria {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makePredicates(for criteria: ConsoleSearchCriteria.Shared, isNetwork: Bool = false) -> [NSPredicate] {
     var predicates = [NSPredicate]()
 
@@ -64,6 +66,7 @@ private func makePredicates(for criteria: ConsoleSearchCriteria.Shared, isNetwor
     return predicates
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makePredicates(for criteria: ConsoleSearchCriteria.Messages) -> [NSPredicate] {
     var predicates = [NSPredicate]()
 
@@ -95,6 +98,7 @@ private func makePredicates(for criteria: ConsoleSearchCriteria.Messages) -> [NS
     return predicates
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makePredicates(for criteria: ConsoleSearchCriteria.Network) -> [NSPredicate] {
     var predicates = [NSPredicate]()
 

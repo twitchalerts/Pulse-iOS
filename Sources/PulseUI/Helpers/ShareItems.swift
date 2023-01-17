@@ -17,7 +17,7 @@ enum ShareStoreOutput: String, RawRepresentable {
         }
     }
 }
-
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ShareItems: Identifiable {
     let id = UUID()
     let items: [Any]
@@ -31,6 +31,7 @@ struct ShareItems: Identifiable {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 enum ShareService {
     private static var task: ShareStoreTask?
 
@@ -112,6 +113,8 @@ enum ShareOutput {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct TemporaryDirectory {
     let url: URL
 
@@ -127,6 +130,7 @@ struct TemporaryDirectory {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension TemporaryDirectory {
     func write(text: String, extension fileExtension: String) -> URL {
         write(data: text.data(using: .utf8) ?? Data(), extension: fileExtension)

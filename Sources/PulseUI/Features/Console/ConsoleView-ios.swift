@@ -9,6 +9,7 @@ import Combine
 
 #if os(iOS)
 
+@available(iOS 14.0, *)
 public struct ConsoleView: View {
     @StateObject private var viewModel: ConsoleViewModel
     @State private var shareItems: ShareItems?
@@ -92,6 +93,7 @@ public struct ConsoleView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleToolbarView: View {
     @ObservedObject var viewModel: ConsoleViewModel
     @State private var isShowingFilters = false
@@ -152,7 +154,7 @@ private struct ConsoleToolbarView: View {
 }
 
 #if DEBUG
-struct ConsoleView_Previews: PreviewProvider {
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)struct ConsoleView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             ConsoleView(viewModel: .init(store: .mock))
@@ -163,8 +165,10 @@ struct ConsoleView_Previews: PreviewProvider {
 
 #endif
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleView {
     /// Creates a view pre-configured to display only network requests
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public static func network(store: LoggerStore = .shared) -> ConsoleView {
         ConsoleView(viewModel: .init(store: store, mode: .network))
     }

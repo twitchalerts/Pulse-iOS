@@ -7,6 +7,7 @@ import Pulse
 import Combine
 import SwiftUI
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleMessageDetailsViewModel {
     let textViewModel: RichTextViewModel
 
@@ -64,6 +65,8 @@ private extension Color {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleMessageTagViewModel {
     let title: String
     let value: String

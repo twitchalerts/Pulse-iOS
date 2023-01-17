@@ -7,6 +7,7 @@ import Combine
 
 #if os(macOS)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct SearchBar: NSViewRepresentable {
     let title: String?
     @Binding var text: String
@@ -105,6 +106,7 @@ struct SearchBar: NSViewRepresentable {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private class FocusAwareSearchField: NSSearchField {
     var onFocusChange: ((Bool) -> Void)?
 

@@ -10,6 +10,7 @@ import Pulse
 import WatchConnectivity
 import SwiftUI
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class LoggerSyncSession: ObservableObject {
     @Published fileprivate(set) var fileTransferStatus: FileTransferStatus = .initial
 
@@ -40,6 +41,7 @@ final class LoggerSyncSession: ObservableObject {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private final class SessionDelegate: NSObject, WCSessionDelegate {
     unowned var session: LoggerSyncSession!
 
@@ -131,6 +133,8 @@ enum FileTransferStatus {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct FileTransferError: Identifiable {
     let id = UUID()
     let message: String

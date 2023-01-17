@@ -6,6 +6,8 @@ import Foundation
 import Pulse
 import CoreData
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleCustomNetworkFilter: Hashable, Identifiable {
     let id = UUID()
     var field: Field
@@ -128,6 +130,7 @@ struct ConsoleCustomNetworkFilter: Hashable, Identifiable {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 func evaluateProgrammaticFilters(_ filters: [ConsoleCustomNetworkFilter], entity: NetworkTaskEntity, store: LoggerStore) -> Bool {
     func isMatch(filter: ConsoleCustomNetworkFilter) -> Bool {
         switch filter.field {

@@ -9,6 +9,8 @@ import Combine
 
 #if os(iOS)
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInsightsRequestsList: View {
     @ObservedObject var viewModel: NetworkInsightsRequestsListViewModel
 
@@ -20,7 +22,7 @@ struct NetworkInsightsRequestsList: View {
         )
     }
 }
-
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class NetworkInsightsRequestsListViewModel: ObservableObject {
     let table: ConsoleTableViewModel
     let details: ConsoleDetailsRouterViewModel

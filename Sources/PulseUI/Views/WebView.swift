@@ -8,6 +8,7 @@ import SwiftUI
 import WebKit
 import UIKit
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct WebView: UIViewRepresentable {
     let data: Data
     let contentType: String
@@ -28,6 +29,7 @@ struct WebView: UIViewRepresentable {
 import WebKit
 import AppKit
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct WebView: NSViewRepresentable {
     let data: Data
     let contentType: String

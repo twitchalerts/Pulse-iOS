@@ -9,6 +9,8 @@ import Combine
 
 #if os(iOS)
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleTextView: View {
     @StateObject private var viewModel = ConsoleTextViewModel()
     @State private var shareItems: ShareItems?
@@ -97,6 +99,7 @@ struct ConsoleTextView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleTextViewSettingsView: View {
     @ObservedObject private var settings: ConsoleTextViewSettings = .shared
 
@@ -125,6 +128,7 @@ private struct ConsoleTextViewSettingsView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleTextViewModel: ObservableObject {
     var text = RichTextViewModel()
     var options: TextRenderer.Options = .init()
@@ -293,6 +297,7 @@ final class ConsoleTextViewModel: ObservableObject {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleTextView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
@@ -320,10 +325,12 @@ struct ConsoleTextView_Previews: PreviewProvider {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private let entities = try! LoggerStore.mock.allMessages().filter {
     $0.logLevel != .trace
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private extension ConsoleTextView {
     init(entities: [NSManagedObject], _ configure: (inout TextRenderer.Options) -> Void) {
         var options = TextRenderer.Options(color: .automatic)

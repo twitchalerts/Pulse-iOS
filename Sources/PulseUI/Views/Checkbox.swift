@@ -4,6 +4,7 @@
 
 import SwiftUI
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct Checkbox<Label: View>: View {
     @Binding var isOn: Bool
     let label: () -> Label
@@ -26,12 +27,14 @@ struct Checkbox<Label: View>: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Checkbox where Label == Text {
     init(_ title: String, isOn: Binding<Bool>) {
         self.init(isOn: isOn) { Text(title) }
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct CheckboxView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 32) {

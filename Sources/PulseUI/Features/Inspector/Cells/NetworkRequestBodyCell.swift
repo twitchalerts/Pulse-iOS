@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkRequestBodyCell: View {
     let viewModel: NetworkRequestBodyCellViewModel
 
@@ -26,6 +28,7 @@ struct NetworkRequestBodyCell: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class NetworkRequestBodyCellViewModel {
     let details: String
     let isEnabled: Bool

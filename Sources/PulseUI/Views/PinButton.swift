@@ -10,6 +10,7 @@ import Combine
 
 #if os(iOS) || os(macOS)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct PinButton: View {
     @ObservedObject var viewModel: PinButtonViewModel
     var isTextNeeded: Bool = true
@@ -24,6 +25,7 @@ struct PinButton: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct PinView: View {
     @ObservedObject var viewModel: PinButtonViewModel
     let font: Font
@@ -38,6 +40,7 @@ struct PinView: View {
 }
 
 #if os(iOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension UIAction {
     static func makePinAction(with viewModel: PinButtonViewModel) -> UIAction {
         UIAction(
@@ -48,6 +51,7 @@ extension UIAction {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension UIContextualAction {
     static func makePinAction(with viewModel: PinButtonViewModel) -> UIContextualAction {
         let action = UIContextualAction(
@@ -61,6 +65,7 @@ extension UIContextualAction {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class PinIndicatorView: UIImageView {
     private var viewModel: PinButtonViewModel?
     private var cancellables: [AnyCancellable] = []
@@ -94,11 +99,13 @@ private let pinImage: UIImage = {
 
 // MARK: - ViewModel
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 protocol Pinnable {
     var pinViewModel: PinButtonViewModel { get }
 }
 
 #if os(iOS) || os(macOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class PinButtonViewModel: ObservableObject {
     @Published private(set) var isPinned = false
     private let message: LoggerMessageEntity?
@@ -131,6 +138,7 @@ final class PinButtonViewModel: ObservableObject {
     }
 }
 #else
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct PinButtonViewModel {
     init(message: LoggerMessageEntity) {}
     init(task: NetworkTaskEntity) {}

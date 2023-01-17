@@ -6,6 +6,7 @@ import SwiftUI
 
 #if os(iOS) || os(tvOS)
 /// A simple text view for rendering attributed strings.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct TextView: UIViewRepresentable {
     let string: NSAttributedString
 
@@ -21,6 +22,7 @@ struct TextView: UIViewRepresentable {
     }
 }
 #elseif os(macOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct TextView: NSViewRepresentable {
     let string: NSAttributedString
 
@@ -38,6 +40,7 @@ struct TextView: NSViewRepresentable {
     }
 }
 #elseif os(watchOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct TextView: View {
     let string: NSAttributedString
 

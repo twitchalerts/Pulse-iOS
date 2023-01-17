@@ -9,6 +9,7 @@ import Combine
 
 #if os(iOS) || os(macOS)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ShareStoreView: View {
     let store: LoggerStore
 
@@ -123,6 +124,7 @@ struct ShareStoreView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private final class ShareStoreViewModel: ObservableObject {
     // Sharing options
     @Published var timeRange: SharingTimeRange
@@ -284,6 +286,7 @@ private extension URL {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct SharedContents {
     var item: ShareItems?
     var size: Int64?
@@ -295,6 +298,7 @@ private struct SharedContents {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ShareStoreView_Previews: PreviewProvider {
     static var previews: some View {
 #if os(iOS)

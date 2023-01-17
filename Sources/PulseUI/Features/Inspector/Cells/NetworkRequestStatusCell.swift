@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkRequestStatusCell: View {
     let viewModel: NetworkRequestStatusCellModel
 
@@ -46,6 +48,8 @@ struct NetworkRequestStatusCell: View {
     #endif
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkRequestStatusCellModel {
     let imageName: String
     let title: String
@@ -90,6 +94,7 @@ struct NetworkRequestStatusCellModel {
 
 // MARK: - Helpers
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct DurationLabel: View {
     @ObservedObject var viewModel: DurationViewModel
 
@@ -104,6 +109,7 @@ private struct DurationLabel: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private final class DurationViewModel: ObservableObject {
     @Published var duration: String?
 
@@ -153,6 +159,7 @@ private extension NetworkResponseEntity {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkRequestStatusCell_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

@@ -8,7 +8,8 @@ import Combine
 
 private let commonKeyPrefix = "com-github-com-kean-pulse__"
 
-final class ConsoleSettings: PersistentSettings {
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+class ConsoleSettings: PersistentSettings {
     static let shared = ConsoleSettings()
 
     @UserDefault("console-line-limit")
@@ -27,6 +28,7 @@ final class ConsoleSettings: PersistentSettings {
     var sharingOutput: ShareStoreOutput = .store
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleTextViewSettings: PersistentSettings {
     static let shared = ConsoleTextViewSettings()
 
@@ -54,6 +56,7 @@ final class ConsoleTextViewSettings: PersistentSettings {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 class PersistentSettings: ObservableObject {
     private var cancellables: [AnyCancellable] = []
 
@@ -71,6 +74,7 @@ class PersistentSettings: ObservableObject {
 }
 
 @propertyWrapper
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class UserDefault<Value: UserDefaultSupportedValue>: UserDefaultProtocol, DynamicProperty {
     private let key: String
     private let defaultValue: Value
@@ -119,6 +123,7 @@ extension Int16: UserDefaultSupportedValue {}
 extension String: UserDefaultSupportedValue {}
 
 @propertyWrapper
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class UserDefaultRaw<Value: RawRepresentable>: UserDefaultProtocol, DynamicProperty {
     private let key: String
     private let defaultValue: Value
@@ -167,6 +172,7 @@ protocol UserDefaultProtocol {
     var didUpdate: AnyPublisher<Void, Never> { get }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private final class UserDefaultsObserver: NSObject {
     let key: String
     private var onChange: (Any, Any) -> Void

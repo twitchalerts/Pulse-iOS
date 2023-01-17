@@ -8,6 +8,7 @@ import Pulse
 import Combine
 
 #if os(iOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct LegacyRichTextView: View {
     @ObservedObject var viewModel: RichTextViewModel
 
@@ -33,6 +34,7 @@ struct LegacyRichTextView: View {
 #endif
 
 #if os(iOS) || os(macOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct LegacyRichTextViewSearchToobar: View {
     @ObservedObject var viewModel: RichTextViewModel
 

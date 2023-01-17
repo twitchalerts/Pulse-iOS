@@ -5,6 +5,7 @@
 import Foundation
 import Pulse
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class TextRendererJSON {
     // Input
     private let json: Any
@@ -195,6 +196,7 @@ final class TextRendererJSON {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct JSONColors {
     static let punctuation = UXColor.dynamic(
         light: .init(red: 113.0/255.0, green: 128.0/255.0, blue: 141.0/255.0, alpha: 1.0),

@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorResponseBodyView: View {
     let viewModel: NetworkInspectorResponseBodyViewModel
 
@@ -34,6 +36,7 @@ struct NetworkInspectorResponseBodyView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class NetworkInspectorResponseBodyViewModel {
     private(set) lazy var fileViewModel = data.map { data in
         FileViewerViewModel(

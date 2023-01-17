@@ -247,6 +247,7 @@
 		0CF0D6F1296F1AF100EED9D4 /* Pulse.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0CF0D542296F14EA00EED9D4 /* Pulse.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0CF0D6F4296F1AF100EED9D4 /* PulseUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CF0D56C296F17CB00EED9D4 /* PulseUI.framework */; };
 		0CF0D6F5296F1AF100EED9D4 /* PulseUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0CF0D56C296F17CB00EED9D4 /* PulseUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1A216F4DAB5E5E22DB91C5D2 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A216C5C1BC236C729CFD2DC /* AppStorage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -690,6 +691,7 @@
 		0CF0D6C8296F18FD00EED9D4 /* ConsoleViewModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleViewModelTests.swift; sourceTree = "<group>"; };
 		0CF0D6C9296F18FD00EED9D4 /* MockTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockTests.swift; sourceTree = "<group>"; };
 		0CFF9BD825D6199A0069DB6A /* repos.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = repos.json; sourceTree = "<group>"; };
+		1A216C5C1BC236C729CFD2DC /* AppStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
 		49E82A8526D107A00070244F /* AlamofireIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlamofireIntegration.swift; sourceTree = "<group>"; };
 		49E82A8826D1083D0070244F /* MoyaIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoyaIntegration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1102,6 +1104,7 @@
 				0CF0D4A7296F14CF00EED9D4 /* PulseDocument.swift */,
 				0CF0D4A8296F14CF00EED9D4 /* Extensions.swift */,
 				0CF0D4A9296F14CF00EED9D4 /* Regex.swift */,
+				1A216C5C1BC236C729CFD2DC /* AppStorage.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -1956,6 +1959,7 @@
 				0CF0D557296F15F600EED9D4 /* RemoteLogger-Helpers.swift in Sources */,
 				0CF0D565296F15FD00EED9D4 /* PulseDocument.swift in Sources */,
 				0CF0D563296F15FD00EED9D4 /* Regex.swift in Sources */,
+				1A216F4DAB5E5E22DB91C5D2 /* AppStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2381,6 +2385,7 @@
 				DEVELOPMENT_TEAM = NR8DLKJ7E6;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Demo/iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2407,6 +2412,7 @@
 				DEVELOPMENT_TEAM = NR8DLKJ7E6;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Demo/iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2457,7 +2463,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 3.1.0;
 				ONLY_ACTIVE_ARCH = YES;
@@ -2501,7 +2507,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 3.1.0;
 				SDKROOT = iphoneos;
@@ -2524,6 +2530,7 @@
 				DEVELOPMENT_TEAM = NR8DLKJ7E6;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = App/iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2547,6 +2554,7 @@
 				DEVELOPMENT_TEAM = NR8DLKJ7E6;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = App/iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2812,7 +2820,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.kean.pulse;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = auto;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
@@ -2844,7 +2851,6 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.kean.pulse;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = auto;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

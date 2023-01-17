@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleSearchListSelectionView<Element: Hashable, Label: View>: View {
     let title: String
     let items: [Element]
@@ -134,6 +136,8 @@ struct ConsoleSearchListSelectionView<Element: Hashable, Label: View>: View {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleSearchListCell: View {
     let title: String
     let details: String
@@ -148,6 +152,7 @@ struct ConsoleSearchListCell: View {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleSearchListSelectionView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
@@ -156,6 +161,7 @@ struct ConsoleSearchListSelectionView_Previews: PreviewProvider {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleSearchListSelectionViewDemo: View {
     @State private var selection: Set<String>  = []
 

@@ -5,6 +5,7 @@
 import SwiftUI
 import Pulse
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct FileViewer: View {
     @ObservedObject var viewModel: FileViewerViewModel
 
@@ -44,6 +45,7 @@ struct FileViewer: View {
 // MARK: - Preview
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct FileViewer_Previews: PreviewProvider {
     static var previews: some View {
         Group {
@@ -70,6 +72,7 @@ struct FileViewer_Previews: PreviewProvider {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct PreviewContainer<Content: View>: View {
     @ViewBuilder var contents: () -> Content
 

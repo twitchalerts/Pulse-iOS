@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkDetailsView: View {
     private var title: String
     private let viewModel: NetworkDetailsViewModel?
@@ -38,6 +40,7 @@ struct NetworkDetailsView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class NetworkDetailsViewModel {
     private(set) lazy var text = makeString().map { RichTextViewModel(string: $0) }
     private let makeString: () -> NSAttributedString?

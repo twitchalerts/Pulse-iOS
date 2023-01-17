@@ -9,6 +9,7 @@ import Combine
 
 #if os(tvOS)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ConsoleView: View {
     @StateObject private var viewModel: ConsoleViewModel
     @State private var isShowingFiltersView = false
@@ -45,6 +46,7 @@ public struct ConsoleView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleMenuView: View {
     @ObservedObject var viewModel: ConsoleViewModel
 
@@ -91,6 +93,7 @@ private struct ConsoleMenuView: View {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

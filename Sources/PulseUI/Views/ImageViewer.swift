@@ -5,6 +5,7 @@
 import SwiftUI
 import Pulse
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ImageViewer: View {
     let viewModel: ImagePreviewViewModel
 
@@ -26,6 +27,7 @@ struct ImageViewer: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ImagePreviewViewModel {
     let image: UXImage
     let info: NSAttributedString

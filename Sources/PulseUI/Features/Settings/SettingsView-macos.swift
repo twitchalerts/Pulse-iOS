@@ -8,6 +8,7 @@ import Pulse
 #if os(macOS)
 import UniformTypeIdentifiers
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
 
@@ -91,6 +92,7 @@ public struct SettingsView: View {
 // MARK: - Preview
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleSettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView(viewModel: SettingsViewModel(store: .shared))

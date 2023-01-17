@@ -8,6 +8,7 @@ import Pulse
 import Combine
 import UIKit
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleNetworkRequestTableCell: UITableViewCell, UIContextMenuInteractionDelegate {
     private let badge = CircleView()
     private let title = UILabel()
@@ -170,7 +171,8 @@ final class ConsoleNetworkRequestTableCell: UITableViewCell, UIContextMenuIntera
     }
 }
 
-private final class CircleView: UIView {
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+final class CircleView: UIView {
     var fillColor: UIColor = .red {
         didSet {
             setNeedsDisplay()

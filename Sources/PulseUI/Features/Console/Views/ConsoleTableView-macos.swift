@@ -10,6 +10,7 @@ import CoreData
 import Combine
 import AppKit
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleTableViewModel: ObservableObject {
     let searchViewModel: ConsoleSearchViewModel?
     var diff: CollectionDifference<NSManagedObjectID>?
@@ -24,11 +25,13 @@ final class ConsoleTableViewModel: ObservableObject {
 ///  - Reload performance issues
 ///  - NavigationLink popped when cell disappears
 ///  - List doesn't keep scroll position when reloaded
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleTableView: NSViewRepresentable {
     let viewModel: ConsoleTableViewModel
     let onSelected: (NSManagedObject?) -> Void
 
-    final class Coordinator: NSObject, NSTableViewDelegate, NSTableViewDataSource {
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+final class Coordinator: NSObject, NSTableViewDelegate, NSTableViewDataSource {
         private let viewModel: ConsoleTableViewModel
 
         var entities: [NSManagedObject] = []
@@ -122,6 +125,7 @@ struct ConsoleTableView: NSViewRepresentable {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class HostingTableCell: NSTableCellView {
     let hostingView = NSHostingView(rootView: AnyView(EmptyView()))
 

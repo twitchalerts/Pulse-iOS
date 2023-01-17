@@ -8,6 +8,8 @@ import Combine
 import Pulse
 import Network
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct RemoteLoggerSettingsView: View {
     @ObservedObject var viewModel: RemoteLoggerSettingsViewModel
     
@@ -33,6 +35,7 @@ struct RemoteLoggerSettingsView: View {
         }
     }
     
+    @available(iOS 14.0, *)
     private var progressView: some View {
 #if os(watchOS)
         ProgressView()
@@ -79,6 +82,7 @@ struct RemoteLoggerSettingsView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class RemoteLoggerSettingsViewModel: ObservableObject {
     @Published var isEnabled: Bool = false
     @Published var servers: [RemoteLoggerServerViewModel] = []
@@ -132,6 +136,8 @@ final class RemoteLoggerSettingsViewModel: ObservableObject {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct RemoteLoggerServerViewModel: Identifiable {
     let id: AnyHashable
     let name: String
@@ -151,6 +157,7 @@ private extension NWBrowser.Result {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct RemoteLoggerSettingsView_Previews: PreviewProvider {
     static var previews: some View {
         RemoteLoggerSettingsView(viewModel: .shared)

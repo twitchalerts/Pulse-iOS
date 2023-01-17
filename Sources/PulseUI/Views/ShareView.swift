@@ -7,6 +7,7 @@ import SwiftUI
 #if os(iOS)
 import UIKit
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ShareView: UIViewControllerRepresentable {
     var activityItems: [Any]
     var applicationActivities: [UIActivity]?
@@ -42,6 +43,7 @@ struct ShareView: UIViewControllerRepresentable {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension UIActivityViewController {
     static func show(with items: ShareItems) {
         let vc = UIActivityViewController(activityItems: items.items, applicationActivities: nil)
@@ -52,6 +54,7 @@ extension UIActivityViewController {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private extension UIApplication {
     var topViewController: UIViewController?{
         let keyWindow = UIApplication.keyWindow
@@ -80,6 +83,7 @@ private extension UIApplication {
 #if os(macOS)
 import AppKit
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ShareView: View {
     let items: ShareItems
 

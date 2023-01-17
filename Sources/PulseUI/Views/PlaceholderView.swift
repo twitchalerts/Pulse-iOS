@@ -4,6 +4,7 @@
 
 import SwiftUI
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct PlaceholderView: View {
     var imageName: String?
     let title: String
@@ -45,6 +46,7 @@ struct PlaceholderView: View {
 
 #if os(iOS) || os(macOS) || os(tvOS)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension PlaceholderView {
     static func make(viewModel: ConsoleViewModel) -> PlaceholderView {
         PlaceholderView(imageName: "message", title: "No Messages", subtitle: nil)
@@ -52,6 +54,7 @@ extension PlaceholderView {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct PlaceholderView_Previews: PreviewProvider {
     static var previews: some View {
         PlaceholderView(imageName: "questionmark.folder", title: "Store Unavailable")

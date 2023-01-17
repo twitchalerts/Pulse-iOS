@@ -9,6 +9,7 @@ import Combine
 
 #if os(macOS)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct ConsoleView: View {
     @StateObject private var viewModel: ConsoleViewModel
  
@@ -61,6 +62,7 @@ private struct ConsoleContainerView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct LegacyConsoleContainerView: View {
     var viewModel: ConsoleViewModel
     @ObservedObject var details: ConsoleDetailsRouterViewModel
@@ -76,6 +78,7 @@ private struct LegacyConsoleContainerView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct Siderbar: View {
     var viewModel: ConsoleViewModel
 
@@ -93,6 +96,7 @@ private struct Siderbar: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleToolbarItems: View {
     @ObservedObject var viewModel: ConsoleViewModel
 
@@ -108,6 +112,7 @@ private struct ConsoleToolbarItems: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleSettingsButton: View {
     let store: LoggerStore
 
@@ -123,6 +128,7 @@ private struct ConsoleSettingsButton: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct FilterPopoverToolbarButton: View {
     let viewModel: ConsoleViewModel
     @State private var isPresented = false
@@ -140,6 +146,7 @@ private struct FilterPopoverToolbarButton: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleToolbarModePickerButton: View {
     @ObservedObject var viewModel: ConsoleViewModel
 
@@ -151,6 +158,8 @@ private struct ConsoleToolbarModePickerButton: View {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleToolbarToggleOnlyErrorsButton: View {
     @Binding var isOnlyErrors: Bool
 
@@ -163,6 +172,7 @@ struct ConsoleToolbarToggleOnlyErrorsButton: View {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleView_Previews: PreviewProvider {
     static var previews: some View {
         ConsoleView(store: .mock)

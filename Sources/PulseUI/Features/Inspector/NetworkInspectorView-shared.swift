@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorSectionRequest: View {
     let viewModel: NetworkInspectorViewModel
     let isCurrentRequest: Bool
@@ -21,6 +23,7 @@ struct NetworkInspectorSectionRequest: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorSectionResponse: View {
     let viewModel: NetworkInspectorViewModel
 
@@ -31,6 +34,7 @@ struct NetworkInspectorSectionResponse: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorSectionTransferStatus: View {
     @ObservedObject var viewModel: NetworkInspectorViewModel
 
@@ -53,6 +57,8 @@ struct NetworkInspectorSectionTransferStatus: View {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorRequestTypePicker: View {
     @Binding var isCurrentRequest: Bool
 

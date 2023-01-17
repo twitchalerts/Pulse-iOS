@@ -5,6 +5,7 @@
 import SwiftUI
 import Pulse
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension TimingViewModel {
     convenience init(task: NetworkTaskEntity) {
         self.init(sections: makeTimingSections(task: task))
@@ -22,6 +23,7 @@ extension TimingViewModel {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makeTimingSections(task: NetworkTaskEntity) -> [TimingRowSectionViewModel] {
     guard let taskInterval = task.taskInterval else {
         return []
@@ -52,6 +54,7 @@ private func makeTimingSections(task: NetworkTaskEntity) -> [TimingRowSectionVie
     return sections
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func _makeRow(title: String, color: UXColor, from: Date, to: Date?, taskInterval: DateInterval) -> TimingRowViewModel {
     let start = CGFloat(from.timeIntervalSince(taskInterval.start) / taskInterval.duration)
     let to = to ?? taskInterval.end
@@ -61,6 +64,7 @@ private func _makeRow(title: String, color: UXColor, from: Date, to: Date?, task
     return TimingRowViewModel(title: title, value: value, color: color, start: CGFloat(start), length: length)
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makeTimingRows(transaction: NetworkTransactionMetricsEntity, taskInterval: DateInterval) -> [TimingRowSectionViewModel] {
     var sections = [TimingRowSectionViewModel]()
 

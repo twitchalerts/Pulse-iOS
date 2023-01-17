@@ -8,6 +8,7 @@ import Pulse
 #if os(iOS)
 import UniformTypeIdentifiers
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var settings: ConsoleSettings = .shared
@@ -39,6 +40,7 @@ public struct SettingsView: View {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

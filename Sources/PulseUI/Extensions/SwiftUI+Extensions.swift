@@ -27,6 +27,8 @@ extension NavigationLink where Label == EmptyView {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct InvisibleNavigationLinks<Content: View>: View {
     @ViewBuilder let content: Content
 
@@ -37,6 +39,7 @@ struct InvisibleNavigationLinks<Content: View>: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
     func invisible() -> some View {
         self.hidden().accessibilityHidden(true)
@@ -84,14 +87,18 @@ enum Keyboard {
 
 // MARK: - Backport
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct Backport<Content: View> {
     let content: Content
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
     var backport: Backport<Self> { Backport(content: self) }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension Backport {
     enum HorizontalEdge {
         case leading, trailing
@@ -176,6 +183,7 @@ extension Button {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension View {
     func inlineNavigationTitle(_ title: String) -> some View {
         self.navigationTitle(title)

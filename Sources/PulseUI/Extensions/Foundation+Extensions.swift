@@ -40,6 +40,8 @@ extension String {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct StringSearchOptions {
     var isRegex: Bool = false
     var isCaseSensitive: Bool = false
@@ -54,6 +56,7 @@ struct StringSearchOptions {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension String.CompareOptions {
     init(_ options: StringSearchOptions) {
         self.init()
@@ -89,6 +92,7 @@ extension NSMutableAttributedString {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension NSObject {
     static var deinitKey = "Pulse.NSObject.deinitKey"
 

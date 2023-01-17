@@ -13,6 +13,7 @@ import PDFKit
 #endif
 
 /// Low-level attributed string creation API.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class TextRenderer {
     struct Options {
         var color: ColorMode = .full
@@ -361,6 +362,7 @@ extension NSAttributedString.Key {
 // MARK: - Previews
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleTextRenderer_Previews: PreviewProvider {
     static var previews: some View {
         Group {
@@ -402,9 +404,12 @@ struct ConsoleTextRenderer_Previews: PreviewProvider {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private let task = LoggerStore.preview.entity(for: .login)
 #endif
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkContent: OptionSet {
     let rawValue: Int16
     init(rawValue: Int16) { self.rawValue = rawValue }

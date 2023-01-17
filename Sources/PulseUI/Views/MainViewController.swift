@@ -9,6 +9,7 @@ import UIKit
 import Pulse
 import SwiftUI
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 public final class MainViewController: UIViewController {
     private let viewModel: ConsoleViewModel
 
@@ -36,6 +37,7 @@ public final class MainViewController: UIViewController {
 
 private var isAppearanceCleanupNeeded = true
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func removeAppearanceOverrides() {
     guard isAppearanceCleanupNeeded else { return }
     isAppearanceCleanupNeeded = false

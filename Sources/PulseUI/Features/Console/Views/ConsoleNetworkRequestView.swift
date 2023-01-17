@@ -9,6 +9,8 @@ import CoreData
 
 #if os(watchOS) || os(tvOS) || os(macOS)
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleNetworkRequestView: View {
     @ObservedObject var viewModel: ConsoleNetworkRequestViewModel
     @ObservedObject var progressViewModel: ProgressViewModel
@@ -99,6 +101,7 @@ struct ConsoleNetworkRequestView: View {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleNetworkRequestView_Previews: PreviewProvider {
     static var previews: some View {
         ConsoleNetworkRequestView(viewModel: .init(task: LoggerStore.preview.entity(for: .login)))

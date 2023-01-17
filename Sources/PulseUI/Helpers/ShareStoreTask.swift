@@ -8,6 +8,7 @@ import CoreData
 import SwiftUI
 import Pulse
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ShareStoreTask {
     private var isCancelled = false
     private var objectIDs: [NSManagedObjectID]
@@ -148,6 +149,7 @@ private func getTask(for object: NSManagedObject) -> NetworkTaskEntity? {
     (object as? NetworkTaskEntity) ?? (object as? LoggerMessageEntity)?.task
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func contentForSharing(count: Int) -> NetworkContent {
     var content = NetworkContent.sharing
     if count > 1 {

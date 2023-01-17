@@ -7,6 +7,7 @@ import SwiftUI
 #if os(iOS)
 import PDFKit
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct PDFKitRepresentedView: UIViewRepresentable {
     let document: PDFDocument
 
@@ -23,6 +24,7 @@ struct PDFKitRepresentedView: UIViewRepresentable {
 #elseif os(macOS)
 import PDFKit
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct PDFKitRepresentedView: NSViewRepresentable {
     let document: PDFDocument
 

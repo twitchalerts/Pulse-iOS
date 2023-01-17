@@ -8,6 +8,7 @@ import Foundation
 import Pulse
 import CoreData
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ManagedObjectTextSearch<T: NSManagedObject> {
     private(set) var objects: AnyCollection<T> = AnyCollection([])
     private var searchIndex: [(NSManagedObjectID, String)]?
@@ -61,6 +62,8 @@ final class ManagedObjectTextSearch<T: NSManagedObject> {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleMatch {
     let index: Int
     let objectID: NSManagedObjectID

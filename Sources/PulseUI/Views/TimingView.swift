@@ -4,6 +4,7 @@
 
 import SwiftUI
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct TimingView: View {
     let viewModel: TimingViewModel
 
@@ -26,6 +27,7 @@ struct TimingView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct TimingSectionView: View {
     let viewModel: TimingRowSectionViewModel
     let parent: TimingViewModel
@@ -51,6 +53,7 @@ private struct TimingSectionView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct TimingRowView: View {
     let viewModel: TimingRowViewModel
     let parent: TimingViewModel
@@ -111,6 +114,7 @@ private struct TimingRowView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class TimingViewModel {
     let sections: [TimingRowSectionViewModel]
 
@@ -131,6 +135,7 @@ final class TimingViewModel {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class TimingRowSectionViewModel: Identifiable {
     let title: String
     let items: [TimingRowViewModel]
@@ -145,6 +150,7 @@ final class TimingRowSectionViewModel: Identifiable {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class TimingRowViewModel: Identifiable {
     let title: String
     let value: String
@@ -166,6 +172,7 @@ final class TimingRowViewModel: Identifiable {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct TimingView_Previews: PreviewProvider {
     static var previews: some View {
         ScrollView {
@@ -178,6 +185,7 @@ struct TimingView_Previews: PreviewProvider {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private let mockSections = [
     TimingRowSectionViewModel(title: "Response", items: [
         TimingRowViewModel(title: "Scheduling", value: "0.01ms", color: .systemBlue, start: 0.0, length: 0.001),

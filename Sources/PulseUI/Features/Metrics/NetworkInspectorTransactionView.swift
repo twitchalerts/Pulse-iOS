@@ -6,6 +6,8 @@ import SwiftUI
 import Pulse
 import CoreData
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorTransactionView: View {
     @ObservedObject var viewModel: NetworkInspectorTransactionViewModel
 
@@ -66,6 +68,7 @@ struct NetworkInspectorTransactionView: View {
 
 // MARK: - ViewModel
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class NetworkInspectorTransactionViewModel: ObservableObject, Identifiable {
     let id: NSManagedObjectID
     let title: String
@@ -98,6 +101,7 @@ final class NetworkInspectorTransactionViewModel: ObservableObject, Identifiable
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInspectorTransactionView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
@@ -116,6 +120,7 @@ struct NetworkInspectorTransactionView_Previews: PreviewProvider {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private let mockTask = LoggerStore.preview.entity(for: .createAPI)
 
 #endif

@@ -11,6 +11,8 @@ import Charts
 
 #if os(iOS)
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct InsightsView: View {
     @ObservedObject var viewModel: InsightsViewModel
 
@@ -107,8 +109,10 @@ struct InsightsView: View {
     @ViewBuilder
     private var redirectsSection: some View {
         Section(header: HStack {
-            Label("Redirects", systemImage: "exclamationmark.triangle.fill")
-                .foregroundColor(.orange)
+            if #available(iOS 14.0, *) {
+                Label("Redirects", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+            }
         }) {
             InfoRow(title: "Redirect Count", details: "\(insights.redirects.count)")
             InfoRow(title: "Total Time Lost", details: DurationFormatter.string(from: insights.redirects.timeLost, isPrecise: false))
@@ -139,6 +143,7 @@ struct InsightsView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct TopSlowestRequestsViw: View {
     let viewModel: InsightsViewModel
 
@@ -148,6 +153,7 @@ private struct TopSlowestRequestsViw: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct RequestsWithRedirectsView: View {
     let viewModel: InsightsViewModel
 
@@ -157,6 +163,7 @@ private struct RequestsWithRedirectsView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct FailingRequestsListView: View {
     let viewModel: InsightsViewModel
 
@@ -166,6 +173,7 @@ private struct FailingRequestsListView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class InsightsViewModel: ObservableObject {
     let insights: NetworkLoggerInsights
     private var cancellable: AnyCancellable?
@@ -248,6 +256,8 @@ final class InsightsViewModel: ObservableObject {
 
 #if DEBUG
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkInsightsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

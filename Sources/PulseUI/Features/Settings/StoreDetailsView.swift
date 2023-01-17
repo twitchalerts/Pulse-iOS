@@ -5,6 +5,8 @@
 import SwiftUI
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct StoreDetailsView: View {
     @StateObject private var viewModel = StoreDetailsViewModel()
 
@@ -34,6 +36,7 @@ struct StoreDetailsView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct Contents: View {
     @ObservedObject var viewModel: StoreDetailsViewModel
 
@@ -79,6 +82,7 @@ private struct Contents: View {
 
 // MARK: - ViewModel
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class StoreDetailsViewModel: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var storeSizeLimit: Int64?
@@ -168,6 +172,7 @@ private let dateFormatter: DateFormatter = {
 }()
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct StoreDetailsView_Previews: PreviewProvider {
     static var previews: some View {
         StoreDetailsView(source: .store(.mock))

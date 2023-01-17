@@ -7,6 +7,7 @@ import Pulse
 import Combine
 import SwiftUI
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleViewModel: NSObject, NSFetchedResultsControllerDelegate, ObservableObject {
     let title: String
     let isNetworkOnly: Bool
@@ -163,6 +164,7 @@ final class ConsoleViewModel: NSObject, NSFetchedResultsControllerDelegate, Obse
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makeFetchRequest(for mode: ConsoleViewModel.Mode) -> NSFetchRequest<NSManagedObject> {
     let request: NSFetchRequest<NSManagedObject>
     switch mode {

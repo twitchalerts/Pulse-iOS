@@ -6,6 +6,8 @@ import SwiftUI
 import CoreData
 import Pulse
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleMessageDetailsRouter: View {
     @ObservedObject var viewModel: ConsoleDetailsRouterViewModel
 
@@ -24,6 +26,7 @@ struct ConsoleMessageDetailsRouter: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleDetailsRouterViewModel: ObservableObject {
     @Published private(set) var viewModel: DetailsViewModel?
     var id: NSManagedObjectID?

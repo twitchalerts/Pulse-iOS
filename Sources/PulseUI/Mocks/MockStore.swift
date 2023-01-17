@@ -8,6 +8,7 @@ import CoreData
 
 #if DEBUG || PULSE_MOCK_INCLUDED
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension LoggerStore {
     static let mock: LoggerStore = {
         let store = makeMockStore()
@@ -18,13 +19,15 @@ extension LoggerStore {
     static let preview = makeMockStore()
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension LoggerStore {
     static let demo: LoggerStore = {
         let store = LoggerStore.shared
         store.startPopulating()
         return store
     }()
-
+    
+    @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     func startPopulating(isIndefinite: Bool = false) {
         func populate() {
             asyncPopulateStore(self)
@@ -54,6 +57,7 @@ private func makeMockStore() -> LoggerStore {
     return try! LoggerStore(storeURL: storeURL, options: [.create, .synchronous])
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct Logger {
     let label: String
     let store: LoggerStore
@@ -65,12 +69,14 @@ private struct Logger {
 
 private var isFirstLog = true
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func asyncPopulateStore(_ store: LoggerStore) {
     Task { @MainActor in
         await _asyncPopulateStore(store)
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func _asyncPopulateStore(_ store: LoggerStore) async {
     @Sendable func logger(named: String) -> Logger {
         Logger(label: named, store: store)
@@ -140,6 +146,7 @@ private func _asyncPopulateStore(_ store: LoggerStore) async {
         .log(level: .critical, "💥 0xDEADBEEF")
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func _syncPopulateStore(_ store: LoggerStore) {
     func logger(named: String) -> Logger {
         Logger(label: named, store: store)
@@ -203,6 +210,7 @@ private func _syncPopulateStore(_ store: LoggerStore) {
         .log(level: .critical, "💥 0xDEADBEEF")
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func _logTask(_ mockTask: MockTask, urlSession: URLSession, logger: NetworkLogger, delay: TimeInterval) {
     let task = makeSessionTask(for: mockTask, urlSession: urlSession)
 
@@ -242,6 +250,7 @@ private func _logTask(_ mockTask: MockTask, urlSession: URLSession, logger: Netw
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func _logTask(_ mockTask: MockTask, urlSession: URLSession, logger: NetworkLogger) {
     let task = makeSessionTask(for: mockTask, urlSession: urlSession)
     if let dataTask = task as? URLSessionDataTask {
@@ -257,6 +266,7 @@ private func _logTask(_ mockTask: MockTask, urlSession: URLSession, logger: Netw
     logger.logTask(task, didFinishDecodingWithError: mockTask.decodingError)
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makeSessionTask(for mockTask: MockTask, urlSession: URLSession) -> URLSessionTask {
     let task: URLSessionTask
     switch mockTask.kind {
@@ -269,6 +279,7 @@ private func makeSessionTask(for mockTask: MockTask, urlSession: URLSession) -> 
     return task
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makeMetrics(for task: MockTask, taskInterval: DateInterval) -> NetworkLogger.Metrics {
     let redirectCount = task.transactions.filter {
         $0.fetchType == .networkLoad && ($0.response as? HTTPURLResponse)?.statusCode == 302
@@ -389,6 +400,7 @@ private func getHeadersEstimatedSize(_ headers: [String: String]?) -> Int64 {
         .count ?? 0)
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension LoggerStore {
     func entity(for task: MockTask) -> NetworkTaskEntity {
         var configuration = NetworkLogger.Configuration()

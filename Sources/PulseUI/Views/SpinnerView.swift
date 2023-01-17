@@ -9,6 +9,7 @@ import Combine
 
 // MARK: - View
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct SpinnerView: View {
     @ObservedObject var viewModel: ProgressViewModel
 
@@ -26,6 +27,7 @@ struct SpinnerView: View {
 }
 
 #if DEBUG
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct SpinnerView_Previews: PreviewProvider {
     static var previews: some View {
         SpinnerView(viewModel: .init(title: "Pending", details: "2.5 MB / 6.0 MB"))
@@ -36,6 +38,7 @@ struct SpinnerView_Previews: PreviewProvider {
 
 // MARK: - ViewModel
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ProgressViewModel: ObservableObject {
     let title: String
     @Published private(set) var details: String?

@@ -7,6 +7,8 @@ import Pulse
 
 #if os(watchOS) || os(tvOS)
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct RichTextView: View {
     let viewModel: RichTextViewModel
 
@@ -28,6 +30,7 @@ struct RichTextView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class RichTextViewModel: ObservableObject {
     let text: String
 

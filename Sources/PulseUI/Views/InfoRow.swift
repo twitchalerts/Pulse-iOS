@@ -4,6 +4,7 @@
 
 import SwiftUI
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct InfoRow: View {
     let title: String
     let details: String?
@@ -22,6 +23,8 @@ struct InfoRow: View {
     }
 }
 
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct KeyValueRow: Identifiable {
     let id: Int
     let item: (String, String?)
