@@ -77,6 +77,8 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDo
         }
 
         do {
+            guard #available(iOS 14.0, *) else { return }
+
             let store = try LoggerStore(storeURL: documentURL)
             let vc = UIHostingController(rootView: MainView(store: store, onDismiss: { [weak self] in
                 self?.dismiss(animated: true, completion: nil)

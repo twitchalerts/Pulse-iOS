@@ -43,6 +43,8 @@ public final class NetworkLoggerInsights: @unchecked Sendable {
         case .networkTaskCreated: break
         case .networkTaskProgressUpdated: break
         case .networkTaskCompleted(let event): process(event: event)
+        case .chartInfoStored: break
+        case .chartPointStored: break
         }
     }
 

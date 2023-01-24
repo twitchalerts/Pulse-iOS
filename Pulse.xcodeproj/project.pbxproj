@@ -247,7 +247,9 @@
 		0CF0D6F1296F1AF100EED9D4 /* Pulse.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0CF0D542296F14EA00EED9D4 /* Pulse.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0CF0D6F4296F1AF100EED9D4 /* PulseUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CF0D56C296F17CB00EED9D4 /* PulseUI.framework */; };
 		0CF0D6F5296F1AF100EED9D4 /* PulseUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0CF0D56C296F17CB00EED9D4 /* PulseUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1A2163236513EA5B3C64BF17 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A216BC31E01067835CD17A4 /* ChartViewModel.swift */; };
 		1A216F4DAB5E5E22DB91C5D2 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A216C5C1BC236C729CFD2DC /* AppStorage.swift */; };
+		B32EA80A297763220046AA27 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B32EA808297762E40046AA27 /* ChartView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -691,9 +693,11 @@
 		0CF0D6C8296F18FD00EED9D4 /* ConsoleViewModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleViewModelTests.swift; sourceTree = "<group>"; };
 		0CF0D6C9296F18FD00EED9D4 /* MockTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockTests.swift; sourceTree = "<group>"; };
 		0CFF9BD825D6199A0069DB6A /* repos.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = repos.json; sourceTree = "<group>"; };
+		1A216BC31E01067835CD17A4 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		1A216C5C1BC236C729CFD2DC /* AppStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
 		49E82A8526D107A00070244F /* AlamofireIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlamofireIntegration.swift; sourceTree = "<group>"; };
 		49E82A8826D1083D0070244F /* MoyaIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoyaIntegration.swift; sourceTree = "<group>"; };
+		B32EA808297762E40046AA27 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1216,6 +1220,7 @@
 				0CF0D5CB296F189500EED9D4 /* Insights */,
 				0CF0D5CE296F189500EED9D4 /* Settings */,
 				0CF0D5D6296F189500EED9D4 /* MessageDetails */,
+				B32EA807297762BC0046AA27 /* Charts */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -1402,6 +1407,15 @@
 				0CFF9BD825D6199A0069DB6A /* repos.json */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		B32EA807297762BC0046AA27 /* Charts */ = {
+			isa = PBXGroup;
+			children = (
+				B32EA808297762E40046AA27 /* ChartView.swift */,
+				1A216BC31E01067835CD17A4 /* ChartViewModel.swift */,
+			);
+			path = Charts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -2086,6 +2100,7 @@
 				0CF0D629296F189600EED9D4 /* PDFRepresentedView.swift in Sources */,
 				0CF0D61E296F189600EED9D4 /* SwiftUI+Extensions.swift in Sources */,
 				0CF0D684296F189600EED9D4 /* ConsoleTableView-ios.swift in Sources */,
+				B32EA80A297763220046AA27 /* ChartView.swift in Sources */,
 				0CF0D664296F189600EED9D4 /* NetworkInspectorMetricsView.swift in Sources */,
 				0CD7E0BD29732C8E00A255B7 /* ShareStoreTask.swift in Sources */,
 				0C11EAEA2971EBEE0059786A /* MockStore.swift in Sources */,
@@ -2094,6 +2109,7 @@
 				0CF0D620296F189600EED9D4 /* Foundation+Extensions.swift in Sources */,
 				0CF0D66C296F189600EED9D4 /* NetworkRequestInfoCell.swift in Sources */,
 				0CF0D632296F189600EED9D4 /* StoreShareView.swift in Sources */,
+				1A2163236513EA5B3C64BF17 /* ChartViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2820,7 +2836,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.kean.pulse;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
+				SDKROOT = iphoneos;
+        SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2851,6 +2868,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.kean.pulse;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2882,7 +2900,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.kean.pulseui;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
+				SDKROOT = iphoneos;
+        SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -2914,6 +2933,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.github.kean.pulseui;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

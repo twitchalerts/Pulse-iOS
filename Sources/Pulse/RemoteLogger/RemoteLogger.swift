@@ -399,6 +399,10 @@ public final class RemoteLogger: RemoteLoggerConnectionDelegate {
             } catch {
                 log(label: "RemoteLogger", "Failed to encode network message \(error)")
             }
+        case .chartInfoStored(let info):
+            connection?.send(code: .storeEventChartInfoStored, entity: info)
+        case .chartPointStored(let point):
+            connection?.send(code: .storeEventChartPointStored, entity: point)
         }
     }
 }

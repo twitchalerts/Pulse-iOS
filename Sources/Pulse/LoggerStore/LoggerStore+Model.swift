@@ -21,6 +21,9 @@ extension LoggerStore {
         let response = Entity(class: NetworkResponseEntity.self)
         let transaction = Entity(class: NetworkTransactionMetricsEntity.self)
 
+        let chartInfo = Entity(class: ChartInfoEntity.self)
+        let chartPoint = Entity(class: ChartPointEntity.self)
+
         let blob = Entity(class: LoggerBlobHandleEntity.self)
 
         message.properties = [
@@ -139,6 +142,23 @@ extension LoggerStore {
             Attribute(name: "responseBodyBytesReceived", type: .integer64AttributeType)
         ]
 
+        chartInfo.properties = [
+            Attribute(name: "createdAt", type: .dateAttributeType),
+            Attribute(name: "chartId", type: .UUIDAttributeType),
+            Attribute(name: "chartName", type: .stringAttributeType),
+            Attribute(name: "minYScale", type: .doubleAttributeType),
+            Attribute(name: "maxYScale", type: .doubleAttributeType),
+            Attribute(name: "dataPointWidth", type: .doubleAttributeType),
+        ]
+
+        chartPoint.properties = [
+            Attribute(name: "createdAt", type: .dateAttributeType),
+            Attribute(name: "pointId", type: .UUIDAttributeType),
+            Attribute(name: "chartId", type: .UUIDAttributeType),
+            Attribute(name: "value", type: .doubleAttributeType),
+            Attribute(name: "timestamp", type: .dateAttributeType),
+        ]
+
         blob.properties = [
             Attribute(name: "key", type: .binaryDataAttributeType),
             Attribute(name: "size", type: .integer32AttributeType),
@@ -149,7 +169,8 @@ extension LoggerStore {
         ]
 
         let model = NSManagedObjectModel()
-        model.entities = [message, label, task, domain, progress, blob, request, response, transaction]
+        model.entities = [message, label, task, domain, progress, chartInfo, chartPoint,
+                          blob, request, response, transaction]
         return model
     }()
 }

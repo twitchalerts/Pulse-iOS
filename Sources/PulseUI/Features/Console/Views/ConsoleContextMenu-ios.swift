@@ -35,7 +35,7 @@ struct ConsoleContextMenu: View {
                 }
                 if !store.isArchive {
                     Button(action: { isShowingInsights = true }) {
-                        Label("Insights", systemImage: "chart.pie")
+                        Label("Insights2", systemImage: "chart.pie")
                     }
                 }
             }

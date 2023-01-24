@@ -247,6 +247,27 @@ extension LoggerStore {
         )))
     }
 
+    public func storeChartInfo(chartId: UUID, chartName: String, minYScale: Double, maxYScale: Double) {
+        handle(.chartInfoStored(.init(
+                createdAt: configuration.makeCurrentDate(),
+                chartId: chartId,
+                chartName: chartName,
+                minYScale: minYScale,
+                maxYScale: maxYScale,
+                dataPointWidth: 10
+        )))
+    }
+
+    public func storeChartPoint(chartId: UUID, value: Double, timestamp: Date) {
+        handle(.chartPointStored(.init(
+                createdAt: configuration.makeCurrentDate(),
+                chartId: chartId,
+                pointId: UUID(),
+                value: value,
+                timestamp: timestamp
+        )))
+    }
+
     /// Handles event created by the current store and dispatches it to observers.
     func handle(_ event: Event) {
         guard let event = configuration.willHandleEvent(event) else {
@@ -269,6 +290,8 @@ extension LoggerStore {
         case .networkTaskCreated(let event): process(event)
         case .networkTaskProgressUpdated(let event): process(event)
         case .networkTaskCompleted(let event): process(event)
+        case .chartInfoStored(let event): process(event)
+        case .chartPointStored(let event): process(event)
         }
     }
 
@@ -410,6 +433,25 @@ extension LoggerStore {
 
         requestsCache = [:]
         responsesCache = [:]
+    }
+
+    private func process(_ event: Event.ChartInfoStored) {
+        let chartInfo = ChartInfoEntity(context: backgroundContext)
+        chartInfo.createdAt = event.createdAt
+        chartInfo.chartId = event.chartId
+        chartInfo.chartName = event.chartName
+        chartInfo.minYScale = event.minYScale
+        chartInfo.maxYScale = event.maxYScale
+        chartInfo.dataPointWidth = event.dataPointWidth
+    }
+
+    private func process(_ event: Event.ChartPointStored) {
+        let chartPoint = ChartPointEntity(context: backgroundContext)
+        chartPoint.createdAt = event.createdAt
+        chartPoint.chartId = event.chartId
+        chartPoint.pointId = event.pointId
+        chartPoint.value = event.value
+        chartPoint.timestamp = event.timestamp
     }
 
     private func preprocessData(_ data: Data, contentType: NetworkLogger.ContentType?) -> Data {

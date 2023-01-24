@@ -328,3 +328,20 @@ public final class LoggerBlobHandleEntity: NSManagedObject {
         }
     }
 }
+
+public final class ChartInfoEntity: NSManagedObject {
+    @NSManaged public var createdAt: Date
+    @NSManaged public var chartId: UUID
+    @NSManaged public var chartName: String
+    @NSManaged public var minYScale: Double
+    @NSManaged public var maxYScale: Double
+    @NSManaged public var dataPointWidth: Double
+}
+
+public final class ChartPointEntity: NSManagedObject {
+    @NSManaged public var createdAt: Date
+    @NSManaged public var pointId: UUID
+    @NSManaged public var chartId: UUID
+    @NSManaged public var value: Double
+    @NSManaged public var timestamp: Date
+}

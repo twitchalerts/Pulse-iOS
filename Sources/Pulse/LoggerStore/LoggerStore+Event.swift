@@ -11,6 +11,8 @@ extension LoggerStore {
         case networkTaskCreated(NetworkTaskCreated)
         case networkTaskProgressUpdated(NetworkTaskProgressUpdated)
         case networkTaskCompleted(NetworkTaskCompleted)
+        case chartInfoStored(ChartInfoStored)
+        case chartPointStored(ChartPointStored)
 
         public struct MessageCreated: Codable, Sendable {
             public var createdAt: Date
@@ -96,6 +98,41 @@ extension LoggerStore {
             }
         }
 
+        public struct ChartInfoStored: Codable, Sendable {
+            public var createdAt: Date
+            public var chartId: UUID
+            public var chartName: String
+            public var minYScale: Double
+            public var maxYScale: Double
+            public var dataPointWidth: Double
+
+            public init(createdAt: Date, chartId: UUID, chartName: String, minYScale: Double, maxYScale: Double,
+                        dataPointWidth: Double) {
+                self.createdAt = createdAt
+                self.chartId = chartId
+                self.chartName = chartName
+                self.minYScale = minYScale
+                self.maxYScale = maxYScale
+                self.dataPointWidth = dataPointWidth
+            }
+        }
+
+        public struct ChartPointStored: Codable, Sendable {
+            public var createdAt: Date
+            public var chartId: UUID
+            public var pointId: UUID
+            public var value: Double
+            public var timestamp: Date
+
+            public init(createdAt: Date, chartId: UUID, pointId: UUID, value: Double, timestamp: Date) {
+                self.createdAt = createdAt
+                self.chartId = chartId
+                self.pointId = pointId
+                self.value = value
+                self.timestamp = timestamp
+            }
+        }
+
         var url: URL? {
             switch self {
             case .messageStored:
@@ -106,6 +143,8 @@ extension LoggerStore {
                 return event.url
             case .networkTaskCompleted(let event):
                 return event.originalRequest.url
+            case .chartInfoStored, .chartPointStored:
+                return nil
             }
         }
     }

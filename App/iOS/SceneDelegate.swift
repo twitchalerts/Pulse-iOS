@@ -27,6 +27,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
 
         do {
+            guard #available(iOS 14.0, *) else { return }
+
             guard context.url.startAccessingSecurityScopedResource() else {
                 throw NSError(domain: NSURLErrorDomain, code: NSURLErrorBadURL, userInfo: [NSLocalizedDescriptionKey: "Failed to get access to file"])
             }

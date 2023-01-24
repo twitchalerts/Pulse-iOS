@@ -41,6 +41,13 @@ extension ConsoleSearchCriteria {
         }
         return predicates.isEmpty ? nil : NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
     }
+
+    static func makeSharedPredicates() -> NSPredicate? {
+        var predicates = [NSPredicate]()
+        let defaultCriteria = ConsoleSearchCriteria()
+        predicates += makePredicates(for: defaultCriteria.shared)
+        return predicates.isEmpty ? nil : NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+    }
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)

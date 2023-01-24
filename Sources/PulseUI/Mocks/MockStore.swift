@@ -65,6 +65,16 @@ private struct Logger {
     func log(level: LoggerStore.Level, _ message: String, metadata: LoggerStore.Metadata? = nil) {
         self.store.storeMessage(label: label, level: level, message: message, metadata: metadata, file: "", function: "", line: 0)
     }
+
+    func logChartInfo(chartName: String, minYScale: Double, maxYScale: Double) -> UUID {
+        let chartId = UUID()
+        store.storeChartInfo(chartId: chartId, chartName: chartName, minYScale: minYScale, maxYScale: maxYScale)
+        return chartId
+    }
+
+    func logChartValue(chartId: UUID, value: Double, timestamp: Date) {
+        store.storeChartPoint(chartId: chartId, value: value, timestamp: timestamp)
+    }
 }
 
 private var isFirstLog = true
@@ -176,6 +186,17 @@ private func _syncPopulateStore(_ store: LoggerStore) {
 
         logger(named: "analytics")
                 .log(level: .debug, "Will navigate to Dashboard")
+
+        for chartIndex in 1...3 {
+            let chartId1 = logger(named: "charts")
+                    .logChartInfo(chartName: "Chart \(chartIndex)", minYScale: 0, maxYScale: 5000)
+
+            let startDate = Date()
+            for interval in 0...100 {
+                logger(named: "charts").logChartValue(chartId: chartId1, value: Double(Int.random(in: 2500...3500)),
+                                                      timestamp: startDate.addingTimeInterval((TimeInterval)(interval)))
+            }
+        }
     }
 
     for task in MockTask.allTasks {
@@ -264,6 +285,11 @@ private func _logTask(_ mockTask: MockTask, urlSession: URLSession, logger: Netw
 
     logger.logTask(task, didCompleteWithError: nil)
     logger.logTask(task, didFinishDecodingWithError: mockTask.decodingError)
+}
+
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+private func _logChartSetup(logger: NetworkLogger) {
+
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
