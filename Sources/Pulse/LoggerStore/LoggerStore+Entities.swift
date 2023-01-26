@@ -16,6 +16,7 @@ public final class LoggerMessageEntity: NSManagedObject {
     @NSManaged public var label: LoggerLabelEntity
     @NSManaged public var rawMetadata: String
     @NSManaged public var task: NetworkTaskEntity?
+    @NSManaged public var chart: ChartInfoEntity?
 
     public lazy var metadata = { KeyValueEncoding.decodeKeyValuePairs(rawMetadata) }()
 }
@@ -336,6 +337,9 @@ public final class ChartInfoEntity: NSManagedObject {
     @NSManaged public var minYScale: Double
     @NSManaged public var maxYScale: Double
     @NSManaged public var dataPointWidth: Double
+
+    /// Associated (technical) message.
+    @NSManaged public var message: LoggerMessageEntity?
 }
 
 public final class ChartPointEntity: NSManagedObject {

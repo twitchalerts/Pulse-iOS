@@ -443,6 +443,19 @@ extension LoggerStore {
         chartInfo.minYScale = event.minYScale
         chartInfo.maxYScale = event.maxYScale
         chartInfo.dataPointWidth = event.dataPointWidth
+
+        let message = LoggerMessageEntity(context: backgroundContext)
+        message.createdAt = chartInfo.createdAt
+        message.level = Level.debug.rawValue
+        message.label = makeLabel(named: "chart")
+        message.session = UUID()
+        message.file = ""
+        message.function = ""
+        message.line = 0
+        message.text = chartInfo.chartName
+
+        message.chart = chartInfo
+        chartInfo.message = message
     }
 
     private func process(_ event: Event.ChartPointStored) {
@@ -736,6 +749,10 @@ extension LoggerStore {
     /// Returns all recorded network requests, least recent messages come first.
     public func allTasks() throws -> [NetworkTaskEntity] {
         try viewContext.fetch(NetworkTaskEntity.self, sortedBy: \.createdAt)
+    }
+
+    public func lastChatInfo() throws -> ChartInfoEntity? {
+        try viewContext.fetch(ChartInfoEntity.self, sortedBy: \.createdAt).first
     }
 
     /// Removes all of the previously recorded messages.

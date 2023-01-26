@@ -21,7 +21,7 @@ public struct ChartView: View {
         static let dataPointWidth: CGFloat = 20
     }
     
-    struct YAxisWidthPreferenceyKey: PreferenceKey {
+    struct YAxisWidthPreferenceKey: PreferenceKey {
         static var defaultValue: CGFloat = .zero
         static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
             value = max(value, nextValue())
@@ -32,7 +32,7 @@ public struct ChartView: View {
         func body(content: Content) -> some View {
             content.background(
                 GeometryReader { geometry in
-                    Color.clear.preference(key: YAxisWidthPreferenceyKey.self, value: geometry.size.width)
+                    Color.clear.preference(key: YAxisWidthPreferenceKey.self, value: geometry.size.width)
                 }
             )
         }
@@ -158,7 +158,7 @@ struct ChartData: Identifiable {
     }
 }
 
-struct YellowGroupBoxStyle: GroupBoxStyle {
+private struct YellowGroupBoxStyle: GroupBoxStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.content
             .padding(.top, 30)

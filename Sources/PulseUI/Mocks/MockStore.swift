@@ -120,6 +120,17 @@ private func _asyncPopulateStore(_ store: LoggerStore) async {
 
         logger(named: "analytics")
                 .log(level: .debug, "Will navigate to Dashboard")
+
+        for chartIndex in 1...3 {
+            let chartId1 = logger(named: "charts")
+                    .logChartInfo(chartName: "Chart \(chartIndex)", minYScale: 0, maxYScale: 5000)
+
+            let startDate = Date()
+            for interval in 0...100 {
+                logger(named: "charts").logChartValue(chartId: chartId1, value: Double(Int.random(in: 2500...3500)),
+                                                      timestamp: startDate.addingTimeInterval((TimeInterval)(interval)))
+            }
+        }
     }
 
     for task in MockTask.allTasks {

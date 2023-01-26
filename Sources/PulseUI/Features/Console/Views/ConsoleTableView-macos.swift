@@ -55,7 +55,11 @@ final class Coordinator: NSObject, NSTableViewDelegate, NSTableViewDataSource {
             case let message as LoggerMessageEntity:
                 if let task = message.task {
                     cell.hostingView.rootView = AnyView(ConsoleNetworkRequestView(viewModel: .init(task: task)))
-                } else {
+                }
+                else if let chart = message.chart {
+                    cell.hostingView.rootView = AnyView(ConsoleChartView(viewModel: .init(chartInfo: chart)))
+                }
+                else {
                     cell.hostingView.rootView = AnyView(ConsoleMessageView(viewModel: .init(message: message)))
                 }
             case let task as NetworkTaskEntity:

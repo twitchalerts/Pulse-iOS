@@ -37,7 +37,8 @@ extension LoggerStore {
             Attribute(name: "line", type: .integer32AttributeType),
             Attribute(name: "rawMetadata", type: .stringAttributeType),
             Relationship(name: "label", type: .oneToOne(), deleteRule: .noActionDeleteRule, entity: label),
-            Relationship(name: "task", type: .oneToOne(isOptional: true), entity: task)
+            Relationship(name: "task", type: .oneToOne(isOptional: true), entity: task),
+            Relationship(name: "chart", type: .oneToOne(isOptional: true), entity: chartInfo),
         ]
 
         label.properties = [
@@ -149,6 +150,7 @@ extension LoggerStore {
             Attribute(name: "minYScale", type: .doubleAttributeType),
             Attribute(name: "maxYScale", type: .doubleAttributeType),
             Attribute(name: "dataPointWidth", type: .doubleAttributeType),
+            Relationship(name: "message", type: .oneToOne(isOptional: true), entity: message)
         ]
 
         chartPoint.properties = [

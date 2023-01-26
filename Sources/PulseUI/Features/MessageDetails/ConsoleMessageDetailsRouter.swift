@@ -21,6 +21,14 @@ struct ConsoleMessageDetailsRouter: View {
                 // TODO: rework the inspector to not require id workaround
                 NetworkInspectorView(viewModel: viewModel)
                     .id(self.viewModel.id)
+            case .chart(let viewModel):
+                if #available(macOS 13.0, *) {
+                    ConsoleChartDetailsView(viewModel: viewModel)
+                            .id(self.viewModel.id)
+                }
+                else {
+                    Text("Chart info is available from macOS 13")
+                }
             }
         }
     }
@@ -31,12 +39,22 @@ final class ConsoleDetailsRouterViewModel: ObservableObject {
     @Published private(set) var viewModel: DetailsViewModel?
     var id: NSManagedObjectID?
 
+    private let store: LoggerStore
+
+    init(store: LoggerStore) {
+        self.store = store
+    }
+
     func select(_ entity: NSManagedObject?) {
         self.id = entity?.objectID
         if let message = entity as? LoggerMessageEntity {
             if let task = message.task {
                 viewModel = .task(.init(task: task))
-            } else {
+            }
+            else if let chart = message.chart {
+                viewModel = .chart(.init(store: store, chartInfo: chart))
+            }
+            else {
                 viewModel = .message(.init(message: message))
             }
         } else if let task = entity as? NetworkTaskEntity {
@@ -49,5 +67,6 @@ final class ConsoleDetailsRouterViewModel: ObservableObject {
     enum DetailsViewModel {
         case message(ConsoleMessageDetailsViewModel)
         case task(NetworkInspectorViewModel)
+        case chart(ConsoleChartDetailsViewModel)
     }
 }
