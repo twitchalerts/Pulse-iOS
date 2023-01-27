@@ -21,10 +21,13 @@ public final class LoggerStore: @unchecked Sendable {
     /// The configuration with which the store was initialized with.
     public let configuration: Configuration
 
+    /// Current session ID.
+    private(set) public var sessionID: Int64 = 0
+
     /// Returns the Core Data container associated with the store.
     public let container: NSPersistentContainer
 
-    /// Returns the view context for accessing entities on the main thead.
+    /// Returns the view context for accessing entities on the main thread.
     public var viewContext: NSManagedObjectContext { container.viewContext }
 
     /// Returns the background managed object context used for all write operations.
@@ -43,12 +46,23 @@ public final class LoggerStore: @unchecked Sendable {
 
     private let blobsURL: URL
     private let manifestURL: URL
-    private let databaseURL: URL // Points to a tempporary location if archive
+    private let databaseURL: URL // Points to a temporary location if archive
     private var requestsCache: [NetworkLogger.Request: NetworkRequestEntity] = [:]
     private var responsesCache: [NetworkLogger.Response: NetworkResponseEntity] = [:]
 
     /// The date one of the loggers was created.
     public static let launchDate = Date()
+
+    /// The store metadata automatically updates when new logs are added.
+    ///
+    /// - warning: The index is initially empty and is populated asynchronously
+    /// after the store is created.
+    @Published public var index = Index()
+
+    public struct Index {
+        /// All unique recorded hosts.
+        public var hosts: Set<String> = []
+    }
 
     // MARK: Shared
 
@@ -118,7 +132,7 @@ public final class LoggerStore: @unchecked Sendable {
             }
             if var manifest = Manifest(url: manifestURL) {
                 if manifest.version != .currentStoreVersion {
-                    // Upgrading to a new vesrion of Pulse store
+                    // Upgrading to a new version of Pulse store
                     try? LoggerStore.removePreviousStore(at: storeURL)
                     manifest.version = .currentStoreVersion // Update version, but keep the storeId
                 }
@@ -163,9 +177,18 @@ public final class LoggerStore: @unchecked Sendable {
     private func postInitialization() throws {
         _ = LoggerStore.launchDate
 
-        backgroundContext.performAndWait {
-            self.backgroundContext.userInfo[WeakLoggerStore.loggerStoreKey] = WeakLoggerStore(store: self)
+        backgroundContext.performAndWait { [context = backgroundContext] in
+            context.userInfo[WeakLoggerStore.loggerStoreKey] = WeakLoggerStore(store: self)
+
+            // Start a new session
+            let session = LoggerSessionEntity(context: context)
+            session.createdAt = LoggerStore.launchDate
+            let sessionID = Int64((try? context.count(for: LoggerSessionEntity.self)) ?? 0)
+            session.sessionID = sessionID
+            try? context.save()
+            self.sessionID = sessionID
         }
+
         if Thread.isMainThread {
             self.viewContext.userInfo[Pins.pinServiceKey] = Pins(store: self)
             self.viewContext.userInfo[WeakLoggerStore.loggerStoreKey] = WeakLoggerStore(store: self)
@@ -175,6 +198,7 @@ public final class LoggerStore: @unchecked Sendable {
                 self.viewContext.userInfo[WeakLoggerStore.loggerStoreKey] = WeakLoggerStore(store: self)
             }
         }
+
         if !isArchive {
             try save(manifest)
             if isAutomaticSweepNeeded {
@@ -183,6 +207,19 @@ public final class LoggerStore: @unchecked Sendable {
                 }
             }
         }
+
+        backgroundContext.perform {
+            self.populateIndex()
+        }
+    }
+
+    /// Creates a new background context.
+    public func newBackgroundContext() -> NSManagedObjectContext {
+        let context = container.newBackgroundContext()
+        context.performAndWait {
+            context.userInfo[WeakLoggerStore.loggerStoreKey] = WeakLoggerStore(store: self)
+        }
+        return context
     }
 
     /// This is a safe fallback for the initialization of the shared store.
@@ -220,7 +257,7 @@ extension LoggerStore {
             level: level,
             message: message,
             metadata: metadata?.unpack(),
-            session: Session.current.id,
+            sessionID: sessionID,
             file: file,
             function: function,
             line: line
@@ -243,7 +280,7 @@ extension LoggerStore {
             requestBody: request.httpBody ?? request.httpBodyStreamData(),
             responseBody: data,
             metrics: metrics.map(NetworkLogger.Metrics.init),
-            session: LoggerStore.Session.current.id
+            sessionID: sessionID
         )))
     }
 
@@ -299,8 +336,8 @@ extension LoggerStore {
         let message = LoggerMessageEntity(context: backgroundContext)
         message.createdAt = event.createdAt
         message.level = event.level.rawValue
-        message.label = makeLabel(named: event.label)
-        message.session = event.session
+        message.label = event.label
+        message.sessionID = event.sessionID
         message.text = event.message
         message.file = (event.file as NSString).lastPathComponent
         message.function = event.function
@@ -310,22 +347,11 @@ extension LoggerStore {
         }
     }
 
-    private func makeLabel(named name: String) -> LoggerLabelEntity {
-        if let entity = try? backgroundContext.first(LoggerLabelEntity.self, { $0.predicate = NSPredicate(format: "name == %@", name) }) {
-            entity.count += 1
-            return entity
-        }
-        let entity = LoggerLabelEntity(context: backgroundContext)
-        entity.name = name
-        entity.count = 1
-        return entity
-    }
-
     private func process(_ event: Event.NetworkTaskCreated) {
-        let entity = findOrCreateTask(forTaskId: event.taskId, taskType: event.taskType, createdAt: event.createdAt, session: event.session, url: event.originalRequest.url)
+        let entity = findOrCreateTask(forTaskId: event.taskId, taskType: event.taskType, createdAt: event.createdAt, sessionID: event.sessionID, url: event.originalRequest.url)
         
         entity.url = event.originalRequest.url?.absoluteString
-        entity.host = event.originalRequest.url?.host.map(makeDomain)
+        entity.host = event.originalRequest.url.flatMap(getHost)
         entity.httpMethod = event.originalRequest.httpMethod
         entity.requestState = NetworkTaskEntity.State.pending.rawValue
         entity.originalRequest = makeRequest(for: event.originalRequest)
@@ -348,10 +374,11 @@ extension LoggerStore {
     }
 
     private func process(_ event: Event.NetworkTaskCompleted) {
-        let entity = findOrCreateTask(forTaskId: event.taskId, taskType: event.taskType, createdAt: event.createdAt, session: event.session, url: event.originalRequest.url)
+        let entity = findOrCreateTask(forTaskId: event.taskId, taskType: event.taskType, createdAt: event.createdAt, sessionID: event.sessionID, url: event.originalRequest.url)
 
         entity.url = event.originalRequest.url?.absoluteString
-        entity.host = event.originalRequest.url?.host.map(makeDomain)
+        let host = event.originalRequest.url.flatMap(getHost)
+        entity.host = host
         entity.httpMethod = event.originalRequest.httpMethod
         entity.statusCode = Int32(event.response?.statusCode ?? 0)
         entity.responseContentType = event.response?.contentType?.type
@@ -431,8 +458,26 @@ extension LoggerStore {
             }
         }
 
+        if let host = host, !host.isEmpty {
+            viewContext.perform {
+                var hosts = self.index.hosts
+                let (isInserted, _) = hosts.insert(host)
+                if isInserted { self.index.hosts = hosts }
+            }
+        }
+
         requestsCache = [:]
         responsesCache = [:]
+    }
+
+    private func getHost(for url: URL) -> String? {
+        if let host = url.host {
+            return host
+        }
+        if url.scheme == nil, let url = URL(string: "https://" + url.absoluteString) {
+            return url.host ?? "" // URL(string: "example.com")?.host with not scheme returns host: ""
+        }
+        return nil
     }
 
     private func process(_ event: Event.ChartInfoStored) {
@@ -491,24 +536,13 @@ extension LoggerStore {
         ]
     }
 
-    private func makeDomain(_ name: String) -> NetworkDomainEntity {
-        if let entity = try? backgroundContext.first(NetworkDomainEntity.self, { $0.predicate = NSPredicate(format: "value == %@", name) }) {
-            entity.count += 1
-            return entity
-        }
-        let entity = NetworkDomainEntity(context: backgroundContext)
-        entity.value = name
-        entity.count = 1
-        return entity
-    }
-
     private func findTask(forTaskId taskId: UUID) -> NetworkTaskEntity? {
         try? backgroundContext.first(NetworkTaskEntity.self) {
             $0.predicate = NSPredicate(format: "taskId == %@", taskId as NSUUID)
         }
     }
 
-    private func findOrCreateTask(forTaskId taskId: UUID, taskType: NetworkLogger.TaskType, createdAt: Date, session: UUID, url: URL?) -> NetworkTaskEntity {
+    private func findOrCreateTask(forTaskId taskId: UUID, taskType: NetworkLogger.TaskType, createdAt: Date, sessionID: Int64, url: URL?) -> NetworkTaskEntity {
         if let entity = findTask(forTaskId: taskId) {
             return entity
         }
@@ -520,13 +554,13 @@ extension LoggerStore {
         task.responseBodySize = -1
         task.requestBodySize = -1
         task.isFromCache = false
-        task.session = session
+        task.sessionID = sessionID
 
         let message = LoggerMessageEntity(context: backgroundContext)
         message.createdAt = createdAt
         message.level = Level.debug.rawValue
-        message.label = makeLabel(named: "network")
-        message.session = session
+        message.label = "network"
+        message.sessionID = sessionID
         message.file = ""
         message.function = ""
         message.line = Int32(NetworkTaskEntity.State.pending.rawValue)
@@ -764,9 +798,8 @@ extension LoggerStore {
         switch document {
         case .package:
             try? deleteEntities(for: LoggerMessageEntity.fetchRequest())
-            try? deleteEntities(for: LoggerLabelEntity.fetchRequest())
-            try? deleteEntities(for: NetworkDomainEntity.fetchRequest())
             try? deleteEntities(for: LoggerBlobHandleEntity.fetchRequest())
+            try? deleteEntities(for: LoggerSessionEntity.fetchRequest())
             try? Files.removeItem(at: blobsURL)
             Files.createDirectoryIfNeeded(at: blobsURL)
         case .archive:
@@ -900,6 +933,29 @@ extension LoggerStore {
     }
 }
 
+// MARK: - LoggerStore (Index)
+
+extension LoggerStore {
+    func populateIndex() {
+        // These calls are fast enough (1-2ms for 5000 messages) so we
+        // could avoid storing this persistently.
+        let hosts: Set<String> = {
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "NetworkTaskEntity")
+            request.resultType = .dictionaryResultType
+            request.returnsDistinctResults = true
+            request.propertiesToFetch = ["host"]
+            guard let results = try? backgroundContext.fetch(request) as? [[String: String]] else {
+                return []
+            }
+            return Set(results.flatMap { $0.values })
+        }()
+
+        viewContext.perform {
+            self.index = Index(hosts: hosts)
+        }
+    }
+}
+
 // MARK: - LoggerStore (Sweep)
 
 extension LoggerStore {
@@ -966,16 +1022,6 @@ extension LoggerStore {
             if let task = message.task {
                 task.requestBody.map(unlink)
                 task.responseBody.map(unlink)
-                if let host = task.host {
-                    host.count -= 1
-                    if host.count == 0 {
-                        backgroundContext.delete(host)
-                    }
-                }
-            }
-            message.label.count -= 1
-            if message.label.count == 0 {
-                backgroundContext.delete(message.label)
             }
         }
 
@@ -1188,7 +1234,7 @@ extension LoggerStore {
 }
 
 extension Version {
-    static let currentStoreVersion = Version(2, 0, 3)
+    static let currentStoreVersion = Version(3, 1, 0)
 }
 
 // MARK: - Constants

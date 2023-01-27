@@ -5,6 +5,7 @@
 import XCTest
 import Foundation
 import CoreData
+import Combine
 @testable import Pulse
 
 final class LoggerStoreTests: XCTestCase {
@@ -13,6 +14,7 @@ final class LoggerStoreTests: XCTestCase {
     var date: Date = Date()
 
     var store: LoggerStore!
+    var cancellables: [AnyCancellable] = []
 
     override func setUp() {
         super.setUp()
@@ -199,7 +201,7 @@ final class LoggerStoreTests: XCTestCase {
         // WHEN
         let info = try LoggerStore.Info.make(storeURL: copyURL)
 
-        XCTAssertEqual(info.storeVersion, "2.0.3")
+        XCTAssertEqual(info.storeVersion, "3.1.0")
         XCTAssertEqual(info.messageCount, 7)
         XCTAssertEqual(info.taskCount, 3)
         XCTAssertEqual(info.blobCount, 3)
@@ -301,6 +303,38 @@ final class LoggerStoreTests: XCTestCase {
         XCTAssertEqual(try storeCopy.allMessages().count, 23)
     }
 
+    // MARK: - Index
+
+    func testThatIndexUpdatesWhenNewMessagsAreAdded() throws {
+        // THEN
+        let expectation = self.expectation(description: "index-updated")
+        store.$index.dropFirst(2).sink { // Drop initial & index load
+            XCTAssertEqual($0.hosts, ["example.com"])
+            expectation.fulfill()
+        }.store(in: &cancellables)
+
+        // WHEN
+        store.storeRequest(URLRequest(url: URL(string: "example.com/login")!), response: nil, error: nil, data: nil)
+        wait(for: [expectation], timeout: 2)
+    }
+
+    func testLoadingExistingIndex() throws {
+        // GIVEN
+        populate(store: store)
+        let copyURL = directory.url.appending(filename: "copy.pulse")
+        try store.copy(to: copyURL)
+        try? store.close()
+
+        // WHEN
+        let copy = try LoggerStore(storeURL: copyURL)
+        let expectation = self.expectation(description: "index-loaded")
+        copy.$index.dropFirst().sink {
+            XCTAssertEqual($0.hosts, ["github.com"])
+            expectation.fulfill()
+        }.store(in: &cancellables)
+        wait(for: [expectation], timeout: 2)
+    }
+
     // MARK: - Expiration
 
     func testSizeLimit() throws {
@@ -389,7 +423,7 @@ final class LoggerStoreTests: XCTestCase {
         XCTAssertEqual(try context.count(for: NetworkTaskProgressEntity.self), 0)
         XCTAssertEqual(try context.count(for: LoggerBlobHandleEntity.self), 0)
 
-        XCTAssertEqual(try store.allMessages().first?.label.name, "kept")
+        XCTAssertEqual(try store.allMessages().first?.label, "kept")
         XCTAssertEqual(try store.allTasks().first?.url, "example.com/kept")
     }
 
@@ -575,7 +609,6 @@ final class LoggerStoreTests: XCTestCase {
 
         let context = store.viewContext
         XCTAssertEqual(try context.count(for: LoggerMessageEntity.self), 11)
-        XCTAssertEqual(try context.count(for: LoggerLabelEntity.self), 6)
         XCTAssertEqual(try context.count(for: NetworkTaskEntity.self), 3)
         XCTAssertEqual(try context.count(for: NetworkRequestEntity.self), 6)
         XCTAssertEqual(try context.count(for: NetworkResponseEntity.self), 5)
@@ -587,7 +620,6 @@ final class LoggerStoreTests: XCTestCase {
 
         // THEN both message and metadata are removed
         XCTAssertEqual(try context.count(for: LoggerMessageEntity.self), 0)
-        XCTAssertEqual(try context.count(for: LoggerLabelEntity.self), 0)
         XCTAssertEqual(try context.count(for: NetworkTaskEntity.self), 0)
         XCTAssertEqual(try context.count(for: NetworkRequestEntity.self), 0)
         XCTAssertEqual(try context.count(for: NetworkResponseEntity.self), 0)
@@ -637,7 +669,7 @@ final class LoggerStoreTests: XCTestCase {
         })
 
         XCTAssertEqual(request.url, "https://github.com/login")
-        XCTAssertEqual(request.host?.value, "github.com")
+        XCTAssertEqual(request.host, "github.com")
         XCTAssertEqual(request.httpMethod, "GET")
         XCTAssertEqual(request.type, .dataTask)
         XCTAssertEqual(request.statusCode, 200)
@@ -702,7 +734,7 @@ final class LoggerStoreTests: XCTestCase {
         let info = try store.info()
 
         // THEN
-        XCTAssertEqual(info.storeVersion, "2.0.3")
+        XCTAssertEqual(info.storeVersion, "3.1.0")
         XCTAssertEqual(info.messageCount, 7)
         XCTAssertEqual(info.taskCount, 3)
         XCTAssertEqual(info.blobCount, 3)

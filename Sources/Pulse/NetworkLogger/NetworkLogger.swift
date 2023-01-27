@@ -90,7 +90,7 @@ public final class NetworkLogger: @unchecked Sendable {
         }
     }
 
-    /// Initialiers the network logger.
+    /// Initializes the network logger.
     ///
     /// - parameters:
     ///   - store: The target store for network requests.
@@ -101,7 +101,7 @@ public final class NetworkLogger: @unchecked Sendable {
         self.processPatterns()
     }
 
-    /// Initialiers and configures the network logger.
+    /// Initializes and configures the network logger.
     public convenience init(store: LoggerStore = .shared, _ configure: (inout Configuration) -> Void) {
         var configuration = Configuration()
         configure(&configuration)
@@ -151,7 +151,7 @@ public final class NetworkLogger: @unchecked Sendable {
             createdAt: Date(),
             originalRequest: .init(originalRequest),
             currentRequest: task.currentRequest.map(Request.init),
-            session: LoggerStore.Session.current.id
+            sessionID: store.sessionID
         )))
     }
 
@@ -225,7 +225,7 @@ public final class NetworkLogger: @unchecked Sendable {
             requestBody: originalRequest.httpBody ?? originalRequest.httpBodyStreamData(),
             responseBody: data,
             metrics: metrics,
-            session: LoggerStore.Session.current.id
+            sessionID: store.sessionID
         )))
     }
 
@@ -321,8 +321,8 @@ private extension URLSessionTask {
 }
 
 private func expandingWildcards(_ pattern: String) -> String {
-    let pattern = pattern
-        .replacingOccurrences(of: ".", with: "\\.")
-        .replacingOccurrences(of: "*", with: ".*?")
+    let pattern = NSRegularExpression.escapedPattern(for: pattern)
+        .replacingOccurrences(of: "\\?", with: ".")
+        .replacingOccurrences(of: "\\*", with: "[^\\s]*")
     return "^\(pattern)$"
 }

@@ -4,6 +4,7 @@
 
 import Foundation
 import Pulse
+import SwiftUI
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension NetworkTaskEntity {
@@ -31,5 +32,23 @@ extension NetworkTaskEntity {
 extension LoggerMessageEntity {
     var logLevel: LoggerStore.Level {
         LoggerStore.Level(rawValue: level) ?? .debug
+    }
+}
+
+extension NetworkTaskEntity.State {
+    var tintColor: Color {
+        switch self {
+        case .pending: return .orange
+        case .success: return .green
+        case .failure: return .red
+        }
+    }
+
+    var iconSystemName: String {
+        switch self {
+        case .pending: return "clock.fill"
+        case .success: return "checkmark.circle.fill"
+        case .failure: return "exclamationmark.octagon.fill"
+        }
     }
 }

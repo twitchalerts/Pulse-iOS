@@ -26,6 +26,12 @@ class ConsoleSettings: PersistentSettings {
 
     @UserDefaultRaw("sharing-output")
     var sharingOutput: ShareStoreOutput = .store
+
+    @UserDefault("recent-searches")
+    var recentSearches: String = "[]"
+
+    @UserDefault("recent-filters")
+    var recentFilters: String = "[]"
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)

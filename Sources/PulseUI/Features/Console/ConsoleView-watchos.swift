@@ -11,9 +11,6 @@ import Pulse
 public struct ConsoleView: View {
     @StateObject private var viewModel: ConsoleViewModel
 
-    @State private var isPresentingSettings = false
-    @State private var isPresentingFilters = false
-
     public init(store: LoggerStore) {
         self.init(viewModel: ConsoleViewModel(store: store))
     }
@@ -24,58 +21,50 @@ public struct ConsoleView: View {
 
     public var body: some View {
         List {
-            toolbar
-            ConsoleMessagesForEach(messages: viewModel.entities)
+            ConsoleToolbarView(viewModel: viewModel)
+            ConsoleListContentView(viewModel: viewModel.list)
         }
+        .background(ConsoleRouterView(viewModel: viewModel))
         .navigationTitle("Console")
-        .onAppear(perform: viewModel.onAppear)
-        .onDisappear(perform: viewModel.onDisappear)
+        .onAppear { viewModel.isViewVisible = true }
+        .onDisappear { viewModel.isViewVisible = false }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button(action: { isPresentingSettings = true }) {
+                Button(action: { viewModel.router.isShowingSettings = true }) {
                     Image(systemName: "gearshape").font(.title3)
                 }
             }
         }
-        .sheet(isPresented: $isPresentingSettings) {
-            NavigationView {
-                SettingsView(viewModel: .init(store: viewModel.store))
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") { isPresentingSettings = false }
-                        }
-                    }
-            }
-        }
-        .sheet(isPresented: $isPresentingFilters) {
-            NavigationView {
-                ConsoleSearchView(viewModel: viewModel.searchViewModel)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") { isPresentingFilters = false }
-                        }
-                    }
-            }
-        }
+    }
+}
+
+private struct ConsoleToolbarView: View {
+    var consoleViewModel: ConsoleViewModel
+    @ObservedObject var viewModel: ConsoleSearchCriteriaViewModel
+    @ObservedObject var router: ConsoleRouter
+
+    init(viewModel: ConsoleViewModel) {
+        self.consoleViewModel = viewModel
+        self.viewModel = viewModel.searchCriteriaViewModel
+        self.router = viewModel.router
     }
 
-    @ViewBuilder
-    private var toolbar: some View {
+    var body: some View {
         HStack {
-            Button(action: viewModel.toggleMode) {
+            Button(action: { consoleViewModel.bindingForNetworkMode.wrappedValue.toggle() } ) {
                 Image(systemName: "arrow.down.circle")
             }
-            .background(viewModel.mode == .network ? Rectangle().foregroundColor(.blue).cornerRadius(8) : nil)
+            .background(consoleViewModel.bindingForNetworkMode.wrappedValue ? Rectangle().foregroundColor(.blue).cornerRadius(8) : nil)
 
             Button(action: { viewModel.isOnlyErrors.toggle() }) {
                 Image(systemName: "exclamationmark.octagon")
             }
             .background(viewModel.isOnlyErrors ? Rectangle().foregroundColor(.red).cornerRadius(8) : nil)
 
-            Button(action: { isPresentingFilters = true }) {
+            Button(action: { router.isShowingFilters = true }) {
                 Image(systemName: "line.3.horizontal.decrease.circle")
             }
-            .background(viewModel.searchViewModel.isCriteriaDefault ? nil : Rectangle().foregroundColor(.blue).cornerRadius(8))
+            .background(viewModel.isCriteriaDefault ? nil : Rectangle().foregroundColor(.blue).cornerRadius(8))
         }
             .font(.title3)
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))

@@ -5,7 +5,7 @@
 import Foundation
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-final class Regex {
+final class RegExp {
     private let regex: NSRegularExpression
 
     struct Options: OptionSet {
@@ -53,7 +53,7 @@ final class Regex {
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-extension Regex {
+extension RegExp {
     struct Match {
         let fullMatch: Substring
         let groups: [Substring]

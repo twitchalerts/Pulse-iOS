@@ -16,63 +16,34 @@ extension Array {
 }
 
 extension NSString {
-    /// Finds all occurrences of the given string
-    func ranges(of substring: String, options: NSString.CompareOptions = []) -> [NSRange] {
-        var index = 0
-        var ranges = [NSRange]()
-        while index < length {
-            let range = range(of: substring, options: options, range: NSRange(location: index, length: length - index), locale: nil)
-            if range.location == NSNotFound {
-                return ranges
-            }
-            ranges.append(range)
-            index = range.upperBound
+    func getLineRange(_ lineRange: NSRange) -> NSRange? {
+        let range = self.lineRange(for: lineRange)
+        return range.location != NSNotFound ? range : nil
+    }
+}
+
+extension Character {
+    init?(_ code: unichar) {
+        guard let scalar = UnicodeScalar(code) else {
+            return nil
         }
-        return ranges
-    }
-
-}
-
-extension String {
-    /// Returns first range of substring.
-    func firstRange(of substring: String, options: String.CompareOptions = []) -> Range<String.Index>? {
-        range(of: substring, options: options, range: startIndex..<endIndex, locale: nil)
+        self = Character(scalar)
     }
 }
 
 
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-struct StringSearchOptions {
-    var isRegex: Bool = false
-    var isCaseSensitive: Bool = false
-    var kind: Kind = .contains
-
-    static let `default` = StringSearchOptions()
-
-    enum Kind: String, CaseIterable {
-        case begins = "Begins With"
-        case contains = "Contains"
-        case ends = "Ends With"
+@available(iOS 15, tvOS 15, *)
+extension AttributedString {
+    init(_ string: String, _ configure: (inout AttributeContainer) -> Void) {
+        var attributes = AttributeContainer()
+        configure(&attributes)
+        self.init(string, attributes: attributes)
     }
-}
 
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-extension String.CompareOptions {
-    init(_ options: StringSearchOptions) {
-        self.init()
-        if options.isRegex { insert(.regularExpression) }
-        if !options.isCaseSensitive { insert(.caseInsensitive) }
-        if !options.isRegex {
-            switch options.kind {
-            case .begins:
-                insert(.anchored)
-            case .ends:
-                insert(.anchored)
-                insert(.backwards)
-            case .contains:
-                break
-            }
-        }
+    mutating func append(_ string: String, _ configure: (inout AttributeContainer) -> Void) {
+        var attributes = AttributeContainer()
+        configure(&attributes)
+        self.append(AttributedString(string, attributes: attributes))
     }
 }
 

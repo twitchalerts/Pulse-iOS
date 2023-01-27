@@ -148,7 +148,7 @@ private struct TopSlowestRequestsViw: View {
     let viewModel: InsightsViewModel
 
     var body: some View {
-        NetworkInsightsRequestsList(viewModel: viewModel.topSlowestRequestsViewModel())
+        ConsolePlainList( viewModel.topSlowestRequests())
             .inlineNavigationTitle("Slowest Requests")
     }
 }
@@ -158,7 +158,7 @@ private struct RequestsWithRedirectsView: View {
     let viewModel: InsightsViewModel
 
     var body: some View {
-        NetworkInsightsRequestsList(viewModel: viewModel.requestsWithRedirectsViewModel())
+        ConsolePlainList( viewModel.requestsWithRedirects())
             .inlineNavigationTitle("Redirects")
     }
 }
@@ -168,7 +168,7 @@ private struct FailingRequestsListView: View {
     let viewModel: InsightsViewModel
 
     var body: some View {
-        NetworkInsightsRequestsList(viewModel: viewModel.failedRequestsViewModel())
+        ConsolePlainList( viewModel.failedRequests())
             .inlineNavigationTitle("Failed Requests")
     }
 }
@@ -227,22 +227,19 @@ final class InsightsViewModel: ObservableObject {
 
     // MARK: - Accessing Data
 
-    func topSlowestRequestsViewModel() -> NetworkInsightsRequestsListViewModel {
-        let tasks = self.tasks(with: Array(insights.duration.topSlowestRequests.keys))
+    func topSlowestRequests() -> [NetworkTaskEntity] {
+        tasks(with: Array(insights.duration.topSlowestRequests.keys))
             .sorted(by: { $0.duration > $1.duration })
-        return NetworkInsightsRequestsListViewModel(tasks: tasks)
     }
 
-    func requestsWithRedirectsViewModel() -> NetworkInsightsRequestsListViewModel {
-        let tasks = self.tasks(with: Array(insights.redirects.taskIds))
+    func requestsWithRedirects() -> [NetworkTaskEntity] {
+        tasks(with: Array(insights.redirects.taskIds))
             .sorted(by: { $0.createdAt > $1.createdAt })
-        return NetworkInsightsRequestsListViewModel(tasks: tasks)
     }
 
-    func failedRequestsViewModel() -> NetworkInsightsRequestsListViewModel {
-        let tasks = self.tasks(with: Array(insights.failures.taskIds))
+    func failedRequests() -> [NetworkTaskEntity] {
+         tasks(with: Array(insights.failures.taskIds))
             .sorted(by: { $0.createdAt > $1.createdAt })
-        return NetworkInsightsRequestsListViewModel(tasks: tasks)
     }
 
     private func tasks(with ids: [UUID]) -> [NetworkTaskEntity] {

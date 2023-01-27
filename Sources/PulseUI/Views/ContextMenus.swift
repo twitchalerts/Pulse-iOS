@@ -8,21 +8,6 @@ import Combine
 
 #if os(iOS) || os(macOS)
 
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-struct ButtonCopyMessage: View {
-    let text: String
-
-    var body: some View {
-        Button(action: {
-            UXPasteboard.general.string = text
-            runHapticFeedback()
-        }) {
-            Label("Copy Message", systemImage: "doc.on.doc")
-        }
-    }
-}
-
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct NetworkMessageContextMenu: View {
     let task: NetworkTaskEntity
 
@@ -31,7 +16,7 @@ struct NetworkMessageContextMenu: View {
     var body: some View {
         NetworkMessageContextMenuCopySection(task: task)
         if let message = task.message {
-            PinButton(viewModel: .init(message: message))
+            PinButton(viewModel: .init(message))
         }
     }
 }
@@ -51,7 +36,7 @@ struct NetworkMessageContextMenuCopySection: View {
                         Label("Copy URL", systemImage: "doc.on.doc")
                     }
                 }
-                if let host = task.host?.value {
+                if let host = task.host {
                     Button(action: {
                         UXPasteboard.general.string = host
                         runHapticFeedback()
@@ -107,20 +92,22 @@ struct StringSearchOptionsMenu: View {
 
     @ViewBuilder
     private var contents: some View {
-        Toggle("Regular Expression", isOn: $options.isRegex)
-        Toggle("Case Sensitive", isOn: $options.isCaseSensitive)
-        pickerOptions
-    }
-
-    @ViewBuilder
-    var pickerOptions: some View {
-        if !options.isRegex && isKindNeeded {
-            Picker(options.kind.rawValue, selection: $options.kind) {
-                ForEach(StringSearchOptions.Kind.allCases, id: \.self) {
+        Picker("Kind", selection: $options.kind) {
+            ForEach(StringSearchOptions.Kind.allCases, id: \.self) {
+                Text($0.rawValue).tag($0)
+            }
+        }
+        Picker("Case Sensitivity", selection: $options.caseSensitivity) {
+            ForEach(StringSearchOptions.CaseSensitivity.allCases, id: \.self) {
+                Text($0.rawValue).tag($0)
+            }
+        }
+        if let rules = options.allEligibleMatchingRules(), isKindNeeded {
+            Picker("Matching Rule", selection: $options.rule) {
+                ForEach(rules, id: \.self) {
                     Text($0.rawValue).tag($0)
                 }
             }
-            .pickerStyle(.menu)
         }
     }
 }

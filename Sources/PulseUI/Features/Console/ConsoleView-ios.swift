@@ -11,154 +11,144 @@ import Combine
 
 @available(iOS 14.0, *)
 public struct ConsoleView: View {
-    @StateObject private var viewModel: ConsoleViewModel
-    @State private var shareItems: ShareItems?
-    @State private var isShowingAsText = false
-    @State private var selectedShareOutput: ShareOutput?
+    @StateObject private var viewModel: ConsoleViewModel // Never reloads
 
     public init(store: LoggerStore = .shared) {
-        self.init(viewModel: ConsoleViewModel(store: store))
+        self.init(viewModel: .init(store: store))
     }
 
     init(viewModel: ConsoleViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
 
+
     public var body: some View {
-        contentView
-            .onAppear(perform: viewModel.onAppear)
-            .onDisappear(perform: viewModel.onDisappear)
-            .edgesIgnoringSafeArea(.bottom)
+        ConsoleListView(viewModel: viewModel)
+            .onAppear { viewModel.isViewVisible = true }
+            .onDisappear { viewModel.isViewVisible = false }
             .navigationTitle(viewModel.title)
-            .navigationBarItems(
-                leading: viewModel.onDismiss.map {
-                    Button(action: $0) { Text("Close") }
-                },
-                trailing: HStack {
-                    if let _ = selectedShareOutput {
-                        ProgressView()
-                            .frame(width: 27, height: 27)
-                    } else {
-                        Menu(content: { shareMenu }) {
-                            Image(systemName: "square.and.arrow.up")
-                        }
-                        .disabled(selectedShareOutput != nil)
-                    }
-                    ConsoleContextMenu(store: viewModel.store, insights: viewModel.insightsViewModel, isShowingAsText: $isShowingAsText)
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarLeading) {
+                    leadingNavigationBarItems
                 }
-            )
-            .sheet(item: $shareItems, content: ShareView.init)
-            .sheet(isPresented: $isShowingAsText) {
-                NavigationView {
-                    ConsoleTextView(entities: viewModel.entitiesSubject) {
-                        isShowingAsText = false
-                    }
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    trailingNavigationBarItems
                 }
             }
+            .background(ConsoleRouterView(viewModel: viewModel))
     }
 
-    @ViewBuilder
-    private var shareMenu: some View {
-        Button(action: { share(as: .plainText) }) {
-            Label("Share as Text", systemImage: "square.and.arrow.up")
-        }
-        Button(action: { share(as: .html) }) {
-            Label("Share as HTML", systemImage: "square.and.arrow.up")
-        }
-    }
-
-    private func share(as output: ShareOutput) {
-        selectedShareOutput = output
-        viewModel.prepareForSharing(as: output) { item in
-            selectedShareOutput = nil
-            shareItems = item
+    private var leadingNavigationBarItems: some View {
+        viewModel.onDismiss.map {
+            Button(action: $0) { Text("Close") }
         }
     }
 
     @ViewBuilder
-    private var contentView: some View {
-        ConsoleTableView(
-            header: { ConsoleToolbarView(viewModel: viewModel) },
-            viewModel: viewModel.table,
-            detailsViewModel: viewModel.details
-        )
-        .overlay(tableOverlay)
-    }
-
-    @ViewBuilder
-    private var tableOverlay: some View {
-        if viewModel.entities.isEmpty {
-            PlaceholderView.make(viewModel: viewModel)
+    private var trailingNavigationBarItems: some View {
+        switch viewModel.source {
+        case .store:
+            ConsoleShareButton(viewModel: viewModel)
+            Button(action: { viewModel.router.isShowingFilters = true }) {
+                Image(systemName: "line.horizontal.3.decrease.circle")
+            }
+            ConsoleContextMenu(viewModel: viewModel)
+        case .entities:
+            ConsoleShareButton(viewModel: viewModel)
         }
     }
 }
 
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-private struct ConsoleToolbarView: View {
-    @ObservedObject var viewModel: ConsoleViewModel
-    @State private var isShowingFilters = false
-    @State private var messageCount = 0
-    @State private var isSearching = false
+private struct ConsoleListView: View {
+    let viewModel: ConsoleViewModel
+    @ObservedObject private var searchBarViewModel: ConsoleSearchBarViewModel
+
+    init(viewModel: ConsoleViewModel) {
+        self.viewModel = viewModel
+        self.searchBarViewModel = viewModel.searchBarViewModel
+    }
 
     var body: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 0) {
-                let suffix = viewModel.mode == .network ? "Requests" : "Messages"
-                SearchBar(
-                    title: "\(viewModel.entities.count) \(suffix)",
-                    text: $viewModel.filterTerm,
-                    isSearching: $isSearching
-                )
-                if !isSearching {
-                    filters
-                } else {
-                    Button("Cancel") {
-                        isSearching = false
-                        viewModel.filterTerm = ""
-                    }
-                    .foregroundColor(.accentColor)
-                    .padding(.horizontal, 14)
-                }
-            }.buttonStyle(.plain)
-        }
-        .padding(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
-        .sheet(isPresented: $isShowingFilters) {
-            NavigationView {
-                ConsoleSearchView(viewModel: viewModel.searchViewModel)
-                    .inlineNavigationTitle("Filters")
-                    .navigationBarItems(trailing: Button("Done") { isShowingFilters = false })
+        let list = List {
+            if #available(iOS 15, *) {
+                _ConsoleSearchableContentView(viewModel: viewModel)
+            } else {
+                _ConsoleRegularContentView(viewModel: viewModel)
             }
+        }.listStyle(.plain)
+        if #available(iOS 16, *) {
+            list
+                .environment(\.defaultMinListRowHeight, 8)
+                .searchable(text: $searchBarViewModel.text, tokens: $searchBarViewModel.tokens, token: {
+                    if let image = $0.systemImage {
+                        Label($0.title, systemImage: image)
+                    } else {
+                        Text($0.title)
+                    }
+                })
+                .onSubmit(of: .search, viewModel.searchViewModel.onSubmitSearch)
+                .disableAutocorrection(true)
+                .textInputAutocapitalization(.never)
+        } else if #available(iOS 15, *) {
+            list
+                .searchable(text: $searchBarViewModel.text)
+                .onSubmit(of: .search, viewModel.searchViewModel.onSubmitSearch)
+                .disableAutocorrection(true)
+                .textInputAutocapitalization(.never)
+        } else {
+            list
+        }
+    }
+}
+
+@available(iOS 15, *)
+private struct _ConsoleSearchableContentView: View {
+    let viewModel: ConsoleViewModel
+    @Environment(\.isSearching) private var isSearching
+
+    var body: some View {
+        contents.onChange(of: isSearching) {
+            viewModel.isSearching = $0
         }
     }
 
     @ViewBuilder
-    private var filters: some View {
-        if !viewModel.isNetworkOnly {
-            Button(action: viewModel.toggleMode) {
-                Image(systemName: viewModel.mode == .network ? "arrow.down.circle.fill" : "arrow.down.circle")
-                    .font(.system(size: 20))
-                    .foregroundColor(.accentColor)
-            }.frame(width: 40, height: 44)
+    private var contents: some View {
+        if isSearching {
+            ConsoleSearchView(viewModel: viewModel)
+        } else {
+            _ConsoleRegularContentView(viewModel: viewModel)
         }
-        Button(action: { viewModel.isOnlyErrors.toggle() }) {
-            Image(systemName: viewModel.isOnlyErrors ? "exclamationmark.octagon.fill" : "exclamationmark.octagon")
-                .font(.system(size: 20))
-                .foregroundColor(viewModel.isOnlyErrors ? .red : .accentColor)
-        }.frame(width: 40, height: 44)
-        Button(action: { isShowingFilters = true }) {
-            Image(systemName: viewModel.searchViewModel.isCriteriaDefault ? "line.horizontal.3.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
-                .font(.system(size: 20))
-                .foregroundColor(.accentColor)
-        }.frame(width: 40, height: 44)
     }
 }
+
+private struct _ConsoleRegularContentView: View {
+    let viewModel: ConsoleViewModel
+
+    var body: some View {
+        let toolbar = ConsoleToolbarView(viewModel: viewModel)
+        if #available(iOS 15.0, *) {
+            toolbar.listRowSeparator(.hidden, edges: .top)
+        } else {
+            toolbar
+        }
+        ConsoleListContentView(viewModel: viewModel.list)
+    }
+}
+
+// MARK: - Previews
 
 #if DEBUG
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationView {
-            ConsoleView(viewModel: .init(store: .mock))
+        Group {
+            NavigationView {
+                ConsoleView(viewModel: .init(store: .mock))
+            }.previewDisplayName("Console")
+            NavigationView {
+                ConsoleView.network(store: .mock)
+            }.previewDisplayName("Network")
         }
     }
 }
@@ -171,6 +161,6 @@ extension ConsoleView {
     /// Creates a view pre-configured to display only network requests
     @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
     public static func network(store: LoggerStore = .shared) -> ConsoleView {
-        ConsoleView(viewModel: .init(store: store, mode: .network))
+        ConsoleView(viewModel: .init(store: store, isOnlyNetwork: true))
     }
 }

@@ -13,47 +13,48 @@ import UniformTypeIdentifiers
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleContextMenu: View {
-    let store: LoggerStore
-    let insights: InsightsViewModel
-    @Binding var isShowingAsText: Bool
+    let viewModel: ConsoleViewModel
+    @ObservedObject var searchCriteriaViewModel: ConsoleSearchCriteriaViewModel
 
-    @State private var isShowingSettings = false
-    @State private var isShowingStoreInfo = false
-    @State private var isShowingInsights = false
-    @State private var isShowingShareStore = false
-    @State private var isDocumentBrowserPresented = false
+    @ObservedObject var router: ConsoleRouter
+
+    init(viewModel: ConsoleViewModel) {
+        self.viewModel = viewModel
+        self.searchCriteriaViewModel = viewModel.searchCriteriaViewModel
+        self.router = viewModel.router
+    }
 
     var body: some View {
         Menu {
             Section {
-                Button(action: { isShowingAsText.toggle() }) {
-                    if isShowingAsText {
+                Button(action: { router.isShowingAsText.toggle() }) {
+                    if router.isShowingAsText {
                         Label("View as List", systemImage: "list.bullet.rectangle.portrait")
                     } else {
                         Label("View as Text", systemImage: "text.quote")
                     }
                 }
-                if !store.isArchive {
-                    Button(action: { isShowingInsights = true }) {
+                if !viewModel.store.isArchive {
+                    Button(action: { router.isShowingInsights = true }) {
                         Label("Insights2", systemImage: "chart.pie")
                     }
                 }
             }
             Section {
-                Button(action: { isShowingStoreInfo = true }) {
+                Button(action: { router.isShowingStoreInfo = true }) {
                     Label("Store Info", systemImage: "info.circle")
                 }
-                Button(action: { isShowingShareStore = true }) {
+                Button(action: { router.isShowingShareStore = true }) {
                     Label("Share Store", systemImage: "square.and.arrow.up")
                 }
-                if !store.isArchive {
+                if !viewModel.store.isArchive {
                     Button.destructive(action: buttonRemoveAllTapped) {
                         Label("Remove Logs", systemImage: "trash")
                     }
                 }
             }
             Section {
-                Button(action: { isShowingSettings = true }) {
+                Button(action: { router.isShowingSettings = true }) {
                     Label("Settings", systemImage: "gear")
                 }
             }
@@ -70,44 +71,10 @@ struct ConsoleContextMenu: View {
         } label: {
             Image(systemName: "ellipsis.circle")
         }
-        .sheet(isPresented: $isShowingSettings) {
-            NavigationView {
-                SettingsView(store: store)
-                    .navigationTitle("Settings")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .navigationBarItems(trailing: Button(action: { isShowingSettings = false }) {
-                        Text("Done")
-                    })
-            }
-        }
-        .sheet(isPresented: $isShowingStoreInfo) {
-            NavigationView {
-                StoreDetailsView(source: .store(store))
-                    .navigationBarItems(trailing: Button(action: { isShowingStoreInfo = false }) {
-                        Text("Done")
-                    })
-            }
-        }
-        .sheet(isPresented: $isShowingInsights) {
-            NavigationView {
-                InsightsView(viewModel: insights)
-                    .navigationBarItems(trailing: Button(action: { isShowingInsights = false }) {
-                        Text("Done")
-                    })
-            }
-        }
-        .sheet(isPresented: $isShowingShareStore) {
-            NavigationView {
-                ShareStoreView(store: store, isPresented: $isShowingShareStore)
-            }.backport.presentationDetents([.medium])
-           }
-        .fullScreenCover(isPresented: $isDocumentBrowserPresented) {
-            DocumentBrowser()
-        }
     }
 
     private func buttonRemoveAllTapped() {
-        store.removeAll()
+        viewModel.store.removeAll()
 
         runHapticFeedback(.success)
         ToastView {

@@ -28,9 +28,9 @@ public struct ConsoleView: View {
     @ViewBuilder
     private var contents: some View {
         if #available(macOS 13.0, *) {
-            ConsoleContainerView(viewModel: viewModel, details: viewModel.details)
+            ConsoleContainerView(viewModel: viewModel)
         } else {
-            LegacyConsoleContainerView(viewModel: viewModel, details: viewModel.details)
+            LegacyConsoleContainerView(viewModel: viewModel)
         }
     }
 
@@ -39,20 +39,26 @@ public struct ConsoleView: View {
 
 @available(macOS 13.0, *)
 private struct ConsoleContainerView: View {
-    @ObservedObject var viewModel: ConsoleViewModel
-    let details: ConsoleDetailsRouterViewModel
+    let viewModel: ConsoleViewModel
+    @ObservedObject var searchCriteriaViewModel: ConsoleSearchCriteriaViewModel
     @State private var columnVisibility = NavigationSplitViewVisibility.all
+
+    init(viewModel: ConsoleViewModel) {
+        self.viewModel = viewModel
+        self.searchCriteriaViewModel = viewModel.searchCriteriaViewModel
+    }
 
     var body: some View {
         NavigationSplitView(
             columnVisibility: $columnVisibility,
             sidebar: {
                 Siderbar(viewModel: viewModel)
-                    .searchable(text: $viewModel.filterTerm)
+                    .searchable(text: $searchCriteriaViewModel.filterTerm)
+                    .disableAutocorrection(true)
                     .navigationSplitViewColumnWidth(min: ConsoleView.contentColumnWidth, ideal: 420, max: 640)
             },
             content: {
-                ConsoleMessageDetailsRouter(viewModel: details)
+                EmptyView()
                     .navigationSplitViewColumnWidth(ConsoleView.contentColumnWidth)
             },
             detail: {
@@ -65,13 +71,12 @@ private struct ConsoleContainerView: View {
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct LegacyConsoleContainerView: View {
     var viewModel: ConsoleViewModel
-    @ObservedObject var details: ConsoleDetailsRouterViewModel
 
     var body: some View {
         NavigationView {
             Siderbar(viewModel: viewModel)
                 .frame(minWidth: 320, idealWidth: 320, maxWidth: 600, minHeight: 120, idealHeight: 480, maxHeight: .infinity)
-            ConsoleMessageDetailsRouter(viewModel: details)
+            EmptyView()
                 .frame(minWidth: 430, idealWidth: 500, maxWidth: 600, minHeight: 320, idealHeight: 480, maxHeight: .infinity)
             EmptyView()
         }
@@ -80,19 +85,19 @@ private struct LegacyConsoleContainerView: View {
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct Siderbar: View {
-    var viewModel: ConsoleViewModel
+    @ObservedObject var viewModel: ConsoleViewModel
 
     var body: some View {
-        ConsoleTableView(viewModel: viewModel.table, onSelected: {
-            viewModel.details.select($0)
-        })
-        .toolbar {
-            ToolbarItemGroup(placement: .automatic) {
-                ConsoleToolbarItems(viewModel: viewModel)
-            }
+        List {
+            ConsoleListContentView(viewModel: viewModel.list)
         }
-        .onAppear(perform: viewModel.onAppear)
-        .onDisappear(perform: viewModel.onDisappear)
+            .toolbar {
+                ToolbarItemGroup(placement: .automatic) {
+                    ConsoleToolbarItems(viewModel: viewModel)
+                }
+            }
+            .onAppear { viewModel.isViewVisible = true }
+            .onDisappear { viewModel.isViewVisible = false }
     }
 }
 
@@ -105,7 +110,7 @@ private struct ConsoleToolbarItems: View {
         Spacer()
         ConsoleToolbarModePickerButton(viewModel: viewModel)
             .keyboardShortcut("n", modifiers: [.command, .shift])
-        ConsoleToolbarToggleOnlyErrorsButton(isOnlyErrors: $viewModel.isOnlyErrors)
+        ConsoleToolbarToggleOnlyErrorsButton(viewModel: viewModel.searchCriteriaViewModel)
             .keyboardShortcut("e", modifiers: [.command, .shift])
         FilterPopoverToolbarButton(viewModel: viewModel)
             .keyboardShortcut("f", modifiers: [.command, .option])
@@ -140,7 +145,7 @@ private struct FilterPopoverToolbarButton: View {
         })
         .help("Toggle Filters Panel (⌥⌘F)")
         .popover(isPresented: $isPresented, arrowEdge: .top) {
-            ConsoleSearchView(viewModel: viewModel.searchViewModel)
+            ConsoleSearchCriteriaView(viewModel: viewModel.searchCriteriaViewModel)
                 .fixedSize()
         }
     }
@@ -148,25 +153,28 @@ private struct FilterPopoverToolbarButton: View {
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleToolbarModePickerButton: View {
-    @ObservedObject var viewModel: ConsoleViewModel
+    let viewModel: ConsoleViewModel
+    @State private var mode: ConsoleMode = .all
 
     var body: some View {
-        Button(action: viewModel.toggleMode) {
-            Image(systemName: viewModel.mode == .network ? "arrow.down.circle.fill" : "arrow.down.circle")
-                .foregroundColor(viewModel.mode == .network ? Color.accentColor : Color.secondary)
-        }.help("Automatically Scroll to Recent Messages (⇧⌘N)")
+        Button(action: { mode = (mode == .tasks ? .all : .tasks) }) {
+            Image(systemName: mode == .tasks ? "arrow.down.circle.fill" : "arrow.down.circle")
+                .foregroundColor(mode == .tasks ? Color.accentColor : Color.secondary)
+        }
+        .help("Automatically Scroll to Recent Messages (⇧⌘N)")
+        .onChange(of: mode) { viewModel.mode = $0 }
     }
 }
 
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleToolbarToggleOnlyErrorsButton: View {
-    @Binding var isOnlyErrors: Bool
+    @ObservedObject var viewModel: ConsoleSearchCriteriaViewModel
 
     var body: some View {
-        Button(action: { isOnlyErrors.toggle() }) {
-            Image(systemName: isOnlyErrors ? "exclamationmark.octagon.fill" : "exclamationmark.octagon")
-                .foregroundColor(isOnlyErrors ? .red : .secondary)
+        Button(action: { viewModel.isOnlyErrors.toggle() }) {
+            Image(systemName: viewModel.isOnlyErrors ? "exclamationmark.octagon.fill" : "exclamationmark.octagon")
+                .foregroundColor(viewModel.isOnlyErrors ? .red : .secondary)
         }.help("Toggle Show Only Errors (⇧⌘E)")
     }
 }

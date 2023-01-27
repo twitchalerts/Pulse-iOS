@@ -15,6 +15,7 @@ struct RichTextView: View {
     let viewModel: RichTextViewModel
 
     private var isTextViewBarItemsHidden = false
+    @Environment(\.textViewSearchContext) private var searchContext
 
     init(viewModel: RichTextViewModel) {
         self.viewModel = viewModel
@@ -27,6 +28,12 @@ struct RichTextView: View {
     }
 
     var body: some View {
+        contents
+            .onAppear { viewModel.prepare(searchContext) }
+    }
+
+    @ViewBuilder
+    private var contents: some View {
         if #available(iOS 15, *) {
             _RichTextView(viewModel: viewModel, isTextViewBarItemsHidden: isTextViewBarItemsHidden)
         } else {
@@ -50,6 +57,7 @@ struct _RichTextView: View {
     var body: some View {
         ContentView(viewModel: viewModel)
             .searchable(text: $viewModel.searchTerm)
+            .disableAutocorrection(true)
             .navigationBarItems(trailing: navigationBarTrailingItems)
             .sheet(item: $shareItems, content: ShareView.init)
             .sheet(isPresented: $isWebViewOpen) {
@@ -73,7 +81,7 @@ struct _RichTextView: View {
             WrappedTextView(viewModel: viewModel)
                 .edgesIgnoringSafeArea([.bottom])
                 .overlay {
-                    if isSearching {
+                    if isSearching || !viewModel.matches.isEmpty {
                         VStack {
                             Spacer()
                             HStack {
@@ -85,8 +93,8 @@ struct _RichTextView: View {
                     }
                 }
                 .onReceive(Keyboard.isHidden) { isKeyboardHidden in
-                    // Show a non-interactive placeholeder during animation,
-                    // then show the actual menu when navigation is setled.
+                    // Show a non-interactive placeholder during animation,
+                    // then show the actual menu when navigation is settled.
                     withAnimation(nil) {
                         isRealMenuShown = false
                     }
@@ -311,3 +319,14 @@ struct RichTextView_Previews: PreviewProvider {
     }
 }
 #endif
+
+private struct TextViewSearchContextKey: EnvironmentKey {
+    static var defaultValue: RichTextViewModel.SearchContext?
+}
+
+extension EnvironmentValues {
+    var textViewSearchContext: RichTextViewModel.SearchContext? {
+        get { self[TextViewSearchContextKey.self] }
+        set { self[TextViewSearchContextKey.self] = newValue }
+    }
+}

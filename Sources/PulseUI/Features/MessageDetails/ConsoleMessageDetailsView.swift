@@ -19,7 +19,7 @@ struct ConsoleMessageDetailsView: View {
 
     @ViewBuilder
     private var trailingNavigationBarItems: some View {
-        HStack(spacing: 10) {
+        HStack {
             NavigationLink(destination: ConsoleMessageMetadataView(message: viewModel.message)) {
                 Image(systemName: "info.circle")
             }
@@ -46,12 +46,9 @@ struct ConsoleMessageDetailsView: View {
 
     var body: some View {
         ConsoleMessageMetadataView(message: viewModel.message)
-            .background(InvisibleNavigationLinks {
-                NavigationLink.programmatic(isActive: $isDetailsLinkActive) {
-                    _MessageTextView(viewModel: viewModel)
-                }
-            }
-            )
+            .background(VStack {
+                NavigationLink(isActive: $isDetailsLinkActive, destination: { _MessageTextView(viewModel: viewModel) }, label: { EmptyView() })
+            }.invisible())
             .onAppear { isDetailsLinkActive = true }
     }
 #endif
@@ -117,13 +114,8 @@ func makeMockMessage() -> LoggerMessageEntity {
     let entity = LoggerMessageEntity(context: LoggerStore.mock.viewContext)
     entity.text = "test"
     entity.createdAt = Date()
-
-    let label = LoggerLabelEntity(context: LoggerStore.mock.viewContext)
-    label.name = "auth"
-    entity.label = label
-
+    entity.label = "auth"
     entity.level = LoggerStore.Level.critical.rawValue
-    entity.session = UUID()
     entity.file = "LoggerStore.swift"
     entity.function = "createMockMessage()"
     entity.line = 12

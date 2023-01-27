@@ -53,9 +53,11 @@ final class ProgressViewModel: ObservableObject {
 
     init(task: NetworkTaskEntity) {
         self.title = ProgressViewModel.title(for: task)
-        observer1 = task.publisher(for: \.progress, options: [.initial, .new]).sink { [weak self] change in
-            if let progress = task.progress {
-                self?.register(for: progress)
+        if task.state == .pending {
+            observer1 = task.publisher(for: \.progress, options: [.initial, .new]).sink { [weak self] change in
+                if let progress = task.progress {
+                    self?.register(for: progress)
+                }
             }
         }
     }
@@ -68,10 +70,24 @@ final class ProgressViewModel: ObservableObject {
         }
     }
 
+    static func details(for task: NetworkTaskEntity) -> String? {
+        guard let progress = task.progress else {
+            return nil
+        }
+        let completed = progress.completedUnitCount
+        let total = progress.totalUnitCount
+        guard completed > 0 || total > 0 else {
+            return nil
+        }
+        let lhs = ByteCountFormatter.string(fromByteCount: max(0, completed))
+        let rhs = ByteCountFormatter.string(fromByteCount: total)
+        return total > 0 ? "\(lhs) / \(rhs)" : lhs
+    }
+
     private func register(for progress: NetworkTaskProgressEntity) {
         self.refresh(with: progress)
-        observer2 = progress.objectWillChange.sink { [self] in
-            self.refresh(with: progress)
+        observer2 = progress.objectWillChange.sink { [weak self] in
+            self?.refresh(with: progress)
         }
     }
 

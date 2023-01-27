@@ -42,42 +42,6 @@ struct ShareView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: UIViewControllerRepresentableContext<ShareView>) {
     }
 }
-
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-extension UIActivityViewController {
-    static func show(with items: ShareItems) {
-        let vc = UIActivityViewController(activityItems: items.items, applicationActivities: nil)
-        vc.completionWithItemsHandler = { _, _, _, _ in
-            items.cleanup()
-        }
-        UIApplication.shared.topViewController?.present(vc, animated: true)
-    }
-}
-
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-private extension UIApplication {
-    var topViewController: UIViewController?{
-        let keyWindow = UIApplication.keyWindow
-
-        if keyWindow?.rootViewController == nil{
-            return keyWindow?.rootViewController
-        }
-
-        var vc = keyWindow?.rootViewController
-
-        while vc?.presentedViewController != nil {
-            switch vc?.presentedViewController {
-            case let navagationController as UINavigationController:
-                vc = navagationController.viewControllers.last
-            case let tabBarController as UITabBarController:
-                vc = tabBarController.selectedViewController
-            default:
-                vc = vc?.presentedViewController
-            }
-        }
-        return vc
-    }
-}
 #endif
 
 #if os(macOS)
