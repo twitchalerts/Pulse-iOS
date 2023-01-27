@@ -21,7 +21,7 @@ public final class LoggerMessageEntity: NSManagedObject {
     @NSManaged public var label: String
     @NSManaged public var rawMetadata: String
     @NSManaged public var task: NetworkTaskEntity?
-    @NSManaged public var chart: ChartInfoEntity?
+    @NSManaged public var chart: ChartEntity?
 
     public lazy var metadata = { KeyValueEncoding.decodeKeyValuePairs(rawMetadata) }()
 }
@@ -325,7 +325,7 @@ public final class LoggerBlobHandleEntity: NSManagedObject {
     }
 }
 
-public final class ChartInfoEntity: NSManagedObject {
+public final class ChartEntity: NSManagedObject {
     @NSManaged public var createdAt: Date
     @NSManaged public var chartId: UUID
     @NSManaged public var chartName: String

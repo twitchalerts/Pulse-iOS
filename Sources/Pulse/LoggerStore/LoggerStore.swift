@@ -481,7 +481,7 @@ extension LoggerStore {
     }
 
     private func process(_ event: Event.ChartInfoStored) {
-        let chartInfo = ChartInfoEntity(context: backgroundContext)
+        let chartInfo = ChartEntity(context: backgroundContext)
         chartInfo.createdAt = event.createdAt
         chartInfo.chartId = event.chartId
         chartInfo.chartName = event.chartName
@@ -540,8 +540,8 @@ extension LoggerStore {
         ]
     }
 
-    private func findChart(chartId chartId: UUID) -> ChartInfoEntity? {
-        try? backgroundContext.first(ChartInfoEntity.self) {
+    private func findChart(chartId chartId: UUID) -> ChartEntity? {
+        try? backgroundContext.first(ChartEntity.self) {
             $0.predicate = NSPredicate(format: "chartId == %@", chartId as NSUUID)
         }
     }
@@ -795,8 +795,8 @@ extension LoggerStore {
         try viewContext.fetch(NetworkTaskEntity.self, sortedBy: \.createdAt)
     }
 
-    public func lastChatInfo() throws -> ChartInfoEntity? {
-        try viewContext.fetch(ChartInfoEntity.self, sortedBy: \.createdAt).first
+    public func lastChatInfo() throws -> ChartEntity? {
+        try viewContext.fetch(ChartEntity.self, sortedBy: \.createdAt).first
     }
 
     /// Removes all of the previously recorded messages.

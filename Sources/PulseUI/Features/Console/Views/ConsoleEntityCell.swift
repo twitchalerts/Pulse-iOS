@@ -9,7 +9,6 @@ import CoreData
 
 struct ConsoleEntityCell: View {
     let entity: NSManagedObject
-//    let store: LoggerStore
 
     var body: some View {
         if let task = entity as? NetworkTaskEntity {
@@ -32,7 +31,11 @@ struct ConsoleEntityCell: View {
         } else if let message = entity as? LoggerMessageEntity {
             if let task = message.task {
                 _ConsoleTaskCell(task: task)
-            } else {
+            }
+            else if let chart = message.chart {
+                _ConsoleChartCell(chart: chart)
+            }
+            else {
                 _ConsoleMessageCell(message: message)
             }
         } else {
@@ -143,17 +146,16 @@ private struct _ConsoleTaskCell: View {
 }
 
 private struct _ConsoleChartCell: View {
-    let chart: ChartInfoEntity
-    let store: LoggerStore
+    let chart: ChartEntity
     @State private var shareItems: ShareItems?
     
     var body: some View {
 #if os(iOS)
         let cell = ConsoleChartCell(viewModel: .init(chartInfo: chart))
-            .background(NavigationLink("", destination: LazyChartDetailsView(chart: chart, store: store)).opacity(0))
+            .background(NavigationLink("", destination: LazyChartDetailsView(chart: chart)).opacity(0))
 #else
         // `id` is a workaround for macOS (needs to be fixed)
-        let cell = NavigationLink(destination: LazyChartDetailsView(chart: chart, store: store).id(chart.objectID)) {
+        let cell = NavigationLink(destination: LazyChartDetailsView(chart: chart).id(chart.objectID)) {
             ConsoleChartCell(viewModel: .init(chartInfo: chart))
         }
 #endif
@@ -216,12 +218,11 @@ private struct LazyConsoleDetailsView: View {
 }
 
 private struct LazyChartDetailsView: View {
-    let chart: ChartInfoEntity
-    let store: LoggerStore
+    let chart: ChartEntity
 
     var body: some View {
         if #available(macOS 13.0, *) {
-            ConsoleChartDetailsView(store: store, chartInfo: chart)
+            ConsoleChartDetailsView(chart: chart)
         } else {
             Text("macOS 13 is required")
         }

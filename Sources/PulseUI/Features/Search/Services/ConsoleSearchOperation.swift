@@ -66,7 +66,7 @@ final class ConsoleSearchOperation {
                     index -= 1
                 } else {
                     DispatchQueue.main.async {
-                        self.delegate?.searchOperation(self, didAddResults: [ConsoleSearchResultViewModel(entity: self.entities[currentMatchIndex], occurrences: occurrences, store: self.store)])
+                        self.delegate?.searchOperation(self, didAddResults: [ConsoleSearchResultViewModel(entity: self.entities[currentMatchIndex], occurrences: occurrences)])
                     }
                 }
             }

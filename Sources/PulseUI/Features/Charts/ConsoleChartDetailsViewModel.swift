@@ -21,10 +21,10 @@ final class ConsoleChartDetailsViewModel: NSObject, ObservableObject {
 	@Published private(set) var pointData: [ChartData] = []
 	@Published private(set) var chartDescription: String = ""
 
-	private let chartInfo: ChartInfoEntity
+	private let chart: ChartEntity
 
-	public init(store: LoggerStore, chartInfo: ChartInfoEntity) {
-		self.chartInfo = chartInfo
+	public init(chart: ChartEntity) {
+		self.chart = chart
 
 		super.init()
 
@@ -34,10 +34,10 @@ final class ConsoleChartDetailsViewModel: NSObject, ObservableObject {
 	// MARK: -
 
 	private func prepare() {
-		chartInfoData = ChartInfo(chartId: chartInfo.chartId, chartName: chartInfo.chartName,
-	  		minYScale: chartInfo.minYScale, maxYScale: chartInfo.maxYScale, dataPointWidth: chartInfo.dataPointWidth)
+		chartInfoData = ChartInfo(chartId: chart.chartId, chartName: chart.chartName,
+	  		minYScale: chart.minYScale, maxYScale: chart.maxYScale, dataPointWidth: chart.dataPointWidth)
 
-		let points = chartInfo.orderedPoints
+		let points = chart.orderedPoints
 		pointData = points.map { ChartData(date: $0.createdAt, value: $0.value) }
 
 		chartDescription = ""

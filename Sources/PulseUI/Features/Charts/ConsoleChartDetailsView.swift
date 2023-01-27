@@ -43,8 +43,8 @@ public struct ConsoleChartDetailsView: View {
 	// Each bar represents a unit duration along xAxis
 	@State private var currentUnitOffset: Int = .zero
 
-	public init(store: LoggerStore = .shared, chartInfo: ChartInfoEntity) {
-		self.init(viewModel: .init(store: store, chartInfo: chartInfo))
+	public init(chart: ChartEntity) {
+		self.init(viewModel: .init(chart: chart))
 	}
 
 	init(viewModel: ConsoleChartDetailsViewModel) {
@@ -141,13 +141,13 @@ private struct YellowGroupBoxStyle: GroupBoxStyle {
 @available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *)
 struct ConsoleChartDetailsView_Previews: PreviewProvider {
 	static var previews: some View {
-        ConsoleChartDetailsView(viewModel: .init(store: .mock, chartInfo: makeMockChartInfoDetails()))
+        ConsoleChartDetailsView(viewModel: .init(chart: makeMockChartInfoDetails()))
 	}
 }
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-func makeMockChartInfoDetails() -> ChartInfoEntity {
-    let entity = ChartInfoEntity(context: LoggerStore.mock.viewContext)
+func makeMockChartInfoDetails() -> ChartEntity {
+    let entity = ChartEntity(context: LoggerStore.mock.viewContext)
     entity.chartName = "Test chart"
 	entity.dataPointWidth = 10
 	entity.createdAt = Date()

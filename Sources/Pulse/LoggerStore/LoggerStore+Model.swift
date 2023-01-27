@@ -21,7 +21,7 @@ extension LoggerStore {
         let response = Entity(class: NetworkResponseEntity.self)
         let transaction = Entity(class: NetworkTransactionMetricsEntity.self)
 
-        let chartInfo = Entity(class: ChartInfoEntity.self)
+        let chartInfo = Entity(class: ChartEntity.self)
         let chartPoint = Entity(class: ChartPointEntity.self)
 
         let blob = Entity(class: LoggerBlobHandleEntity.self)

@@ -326,7 +326,6 @@ struct ConsoleSearchResultViewModel: Identifiable {
     var id: ConsoleSearchResultKey { ConsoleSearchResultKey(id: entity.objectID) }
     let entity: NSManagedObject
     let occurrences: [ConsoleSearchOccurrence]
-    let store: LoggerStore
 }
 
 struct ConsoleSearchResultKey: Hashable{

@@ -13,7 +13,7 @@ import Combine
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleChartCellViewModel {
-	let chartInfo: ChartInfoEntity
+	let chartInfo: ChartEntity
 
 	var preprocessedText: String { chartInfo.chartName }
 
@@ -26,7 +26,7 @@ final class ConsoleChartCellViewModel {
 		return formatter
 	}()
 
-	init(chartInfo: ChartInfoEntity) {
+	init(chartInfo: ChartEntity) {
 		self.chartInfo = chartInfo
 	}
 

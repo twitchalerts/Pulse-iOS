@@ -71,7 +71,7 @@ struct ConsoleSearchResultView: View {
             }
             else if let chart = message.chart {
                 if #available(macOS 13.0, *) {
-                    ConsoleChartDetailsView(viewModel: .init(store: viewModel.store, chartInfo: chart))
+                    ConsoleChartDetailsView(viewModel: .init(chart: chart))
                 } else {
                     Text("macOS 13 is required to view chart details")
                 }
