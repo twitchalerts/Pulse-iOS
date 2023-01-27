@@ -70,6 +70,7 @@ public struct ConsoleChartDetailsView: View {
 			Spacer()
             Text(viewModel.chartDescription)
 		}
+		.padding(16)
 	}
 
 	private func chartContent() -> some View {
