@@ -268,12 +268,10 @@
 		0CF0D6F4296F1AF100EED9D4 /* PulseUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0CF0D56C296F17CB00EED9D4 /* PulseUI.framework */; };
 		0CF0D6F5296F1AF100EED9D4 /* PulseUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0CF0D56C296F17CB00EED9D4 /* PulseUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1A21609390B926975F5AF758 /* ConsoleChartDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2165A8C0B207C3BF5ED4FA /* ConsoleChartDetailsView.swift */; };
-		1A2163236513EA5B3C64BF17 /* ChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A216BC31E01067835CD17A4 /* ChartViewModel.swift */; };
 		1A21641DDBEA730ABBFFE7F2 /* ConsoleChartDetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2166AA598F57F801995C47 /* ConsoleChartDetailsViewModel.swift */; };
-		1A2168A8AAEF20687BA847B7 /* ConsoleChartViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A216EBBC7B234D52F151812 /* ConsoleChartViewModel.swift */; };
-		1A21694CD6636754556D8797 /* ConsoleChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A216D98988D805CB533B3AA /* ConsoleChartView.swift */; };
+		1A2168A8AAEF20687BA847B7 /* ConsoleChartCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A216EBBC7B234D52F151812 /* ConsoleChartCellViewModel.swift */; };
+		1A21694CD6636754556D8797 /* ConsoleChartCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A216D98988D805CB533B3AA /* ConsoleChartCell.swift */; };
 		1A216F4DAB5E5E22DB91C5D2 /* AppStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A216C5C1BC236C729CFD2DC /* AppStorage.swift */; };
-		B32EA80A297763220046AA27 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B32EA808297762E40046AA27 /* ChartView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -739,13 +737,11 @@
 		0CFF9BD825D6199A0069DB6A /* repos.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = repos.json; sourceTree = "<group>"; };
 		1A2165A8C0B207C3BF5ED4FA /* ConsoleChartDetailsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleChartDetailsView.swift; sourceTree = "<group>"; };
 		1A2166AA598F57F801995C47 /* ConsoleChartDetailsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleChartDetailsViewModel.swift; sourceTree = "<group>"; };
-		1A216BC31E01067835CD17A4 /* ChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartViewModel.swift; sourceTree = "<group>"; };
 		1A216C5C1BC236C729CFD2DC /* AppStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppStorage.swift; sourceTree = "<group>"; };
-		1A216D98988D805CB533B3AA /* ConsoleChartView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleChartView.swift; sourceTree = "<group>"; };
-		1A216EBBC7B234D52F151812 /* ConsoleChartViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleChartViewModel.swift; sourceTree = "<group>"; };
+		1A216D98988D805CB533B3AA /* ConsoleChartCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleChartCell.swift; sourceTree = "<group>"; };
+		1A216EBBC7B234D52F151812 /* ConsoleChartCellViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleChartCellViewModel.swift; sourceTree = "<group>"; };
 		49E82A8526D107A00070244F /* AlamofireIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlamofireIntegration.swift; sourceTree = "<group>"; };
 		49E82A8826D1083D0070244F /* MoyaIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoyaIntegration.swift; sourceTree = "<group>"; };
-		B32EA808297762E40046AA27 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1465,8 +1461,8 @@
 				0CF0D603296F189600EED9D4 /* ConsoleTaskCellViewModel.swift */,
 				0CE45E0B2977813400249C5D /* ConsoleToolbarView.swift */,
 				0C7A0DFC297C382300B4B69D /* ConsoleShareButton.swift */,
-				1A216D98988D805CB533B3AA /* ConsoleChartView.swift */,
-				1A216EBBC7B234D52F151812 /* ConsoleChartViewModel.swift */,
+				1A216D98988D805CB533B3AA /* ConsoleChartCell.swift */,
+				1A216EBBC7B234D52F151812 /* ConsoleChartCellViewModel.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1514,8 +1510,6 @@
 		B32EA807297762BC0046AA27 /* Charts */ = {
 			isa = PBXGroup;
 			children = (
-				B32EA808297762E40046AA27 /* ChartView.swift */,
-				1A216BC31E01067835CD17A4 /* ChartViewModel.swift */,
 				1A2165A8C0B207C3BF5ED4FA /* ConsoleChartDetailsView.swift */,
 				1A2166AA598F57F801995C47 /* ConsoleChartDetailsViewModel.swift */,
 			);
@@ -2217,7 +2211,6 @@
 				0CF0D66D296F189600EED9D4 /* NetworkRequestBodyCell.swift in Sources */,
 				0CF0D629296F189600EED9D4 /* PDFRepresentedView.swift in Sources */,
 				0CF0D61E296F189600EED9D4 /* SwiftUI+Extensions.swift in Sources */,
-				B32EA80A297763220046AA27 /* ChartView.swift in Sources */,
 				0CF0D664296F189600EED9D4 /* NetworkInspectorMetricsView.swift in Sources */,
 				0C2343152978B6B900AE7CE6 /* ConsoleSearchSuggestionsService.swift in Sources */,
 				0CD7E0BD29732C8E00A255B7 /* ShareStoreTask.swift in Sources */,
@@ -2228,9 +2221,8 @@
 				0CF0D66C296F189600EED9D4 /* NetworkRequestInfoCell.swift in Sources */,
 				0CB63A15297438A600525165 /* ConsoleSearchViewModel.swift in Sources */,
 				0CF0D632296F189600EED9D4 /* StoreShareView.swift in Sources */,
-				1A2163236513EA5B3C64BF17 /* ChartViewModel.swift in Sources */,
-				1A21694CD6636754556D8797 /* ConsoleChartView.swift in Sources */,
-				1A2168A8AAEF20687BA847B7 /* ConsoleChartViewModel.swift in Sources */,
+				1A21694CD6636754556D8797 /* ConsoleChartCell.swift in Sources */,
+				1A2168A8AAEF20687BA847B7 /* ConsoleChartCellViewModel.swift in Sources */,
 				1A21609390B926975F5AF758 /* ConsoleChartDetailsView.swift in Sources */,
 				1A21641DDBEA730ABBFFE7F2 /* ConsoleChartDetailsViewModel.swift in Sources */,
 			);

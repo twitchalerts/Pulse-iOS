@@ -488,12 +488,12 @@ extension LoggerStore {
         chartInfo.minYScale = event.minYScale
         chartInfo.maxYScale = event.maxYScale
         chartInfo.dataPointWidth = event.dataPointWidth
+        chartInfo.points = []
 
         let message = LoggerMessageEntity(context: backgroundContext)
         message.createdAt = chartInfo.createdAt
         message.level = Level.debug.rawValue
-        message.label = makeLabel(named: "chart")
-        message.session = UUID()
+        message.label = "chart"
         message.file = ""
         message.function = ""
         message.line = 0
@@ -510,6 +510,10 @@ extension LoggerStore {
         chartPoint.pointId = event.pointId
         chartPoint.value = event.value
         chartPoint.timestamp = event.timestamp
+
+        if let chart = findChart(chartId: event.chartId) {
+            chart.points.insert(chartPoint)
+        }
     }
 
     private func preprocessData(_ data: Data, contentType: NetworkLogger.ContentType?) -> Data {
@@ -534,6 +538,12 @@ extension LoggerStore {
             "ResponsePixelWidth": String(Int(image.size.width)),
             "ResponsePixelHeight": String(Int(image.size.height))
         ]
+    }
+
+    private func findChart(chartId chartId: UUID) -> ChartInfoEntity? {
+        try? backgroundContext.first(ChartInfoEntity.self) {
+            $0.predicate = NSPredicate(format: "chartId == %@", chartId as NSUUID)
+        }
     }
 
     private func findTask(forTaskId taskId: UUID) -> NetworkTaskEntity? {

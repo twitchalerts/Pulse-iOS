@@ -12,12 +12,12 @@ import CoreData
 import Combine
 
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-final class ConsoleChartViewModel {
+final class ConsoleChartCellViewModel {
 	let chartInfo: ChartInfoEntity
 
 	var preprocessedText: String { chartInfo.chartName }
 
-	private(set) lazy var time = ConsoleMessageViewModel.timeFormatter.string(from: chartInfo.createdAt)
+	private(set) lazy var time = ConsoleMessageCellViewModel.timeFormatter.string(from: chartInfo.createdAt)
 
 	static let timeFormatter: DateFormatter = {
 		let formatter = DateFormatter()

@@ -92,7 +92,7 @@ public struct ConsoleChartDetailsView: View {
 			}
 		}
 		.frame(width: (viewModel.chartInfoData?.dataPointWidth ?? 10)
-               * CGFloat(((Array<ChartData>)(viewModel.pointData)).count))
+               * CGFloat(viewModel.pointData.count))
 	}
 
 	private func chartYAxis() -> some View {
@@ -154,6 +154,7 @@ func makeMockChartInfoDetails() -> ChartInfoEntity {
 	entity.minYScale = 0
 	entity.maxYScale = 5000
 	entity.chartId = UUID()
+    entity.points = []
     
     var startDate = Date()
     for _ in 0...100 {
@@ -163,6 +164,8 @@ func makeMockChartInfoDetails() -> ChartInfoEntity {
         chartPoint.pointId = UUID()
         chartPoint.value = Double(Int.random(in: 2500...3500))
         chartPoint.timestamp = startDate
+        
+        entity.points.insert(chartPoint)
         
         startDate.addTimeInterval(1)
     }

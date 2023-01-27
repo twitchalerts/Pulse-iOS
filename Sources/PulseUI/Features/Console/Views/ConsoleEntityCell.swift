@@ -9,6 +9,7 @@ import CoreData
 
 struct ConsoleEntityCell: View {
     let entity: NSManagedObject
+//    let store: LoggerStore
 
     var body: some View {
         if let task = entity as? NetworkTaskEntity {
@@ -141,6 +142,25 @@ private struct _ConsoleTaskCell: View {
     }
 }
 
+private struct _ConsoleChartCell: View {
+    let chart: ChartInfoEntity
+    let store: LoggerStore
+    @State private var shareItems: ShareItems?
+    
+    var body: some View {
+#if os(iOS)
+        let cell = ConsoleChartCell(viewModel: .init(chartInfo: chart))
+            .background(NavigationLink("", destination: LazyChartDetailsView(chart: chart, store: store)).opacity(0))
+#else
+        // `id` is a workaround for macOS (needs to be fixed)
+        let cell = NavigationLink(destination: LazyChartDetailsView(chart: chart, store: store).id(chart.objectID)) {
+            ConsoleChartCell(viewModel: .init(chartInfo: chart))
+        }
+#endif
+        cell
+    }
+}
+
 #if os(iOS)
 @available(iOS 15, tvOS 15, *)
 private struct ConsoleMessageCellPreview: View {
@@ -192,5 +212,18 @@ private struct LazyConsoleDetailsView: View {
 
     var body: some View {
         ConsoleMessageDetailsView(viewModel: .init(message: message))
+    }
+}
+
+private struct LazyChartDetailsView: View {
+    let chart: ChartInfoEntity
+    let store: LoggerStore
+
+    var body: some View {
+        if #available(macOS 13.0, *) {
+            ConsoleChartDetailsView(store: store, chartInfo: chart)
+        } else {
+            Text("macOS 13 is required")
+        }
     }
 }

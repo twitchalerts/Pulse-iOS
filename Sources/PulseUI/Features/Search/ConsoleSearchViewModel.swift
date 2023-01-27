@@ -25,7 +25,6 @@ final class ConsoleSearchViewModel: ObservableObject, ConsoleSearchOperationDele
         }
     }
 
-    var isButtonResetEnabled: Bool { !isCriteriaDefault }
     @Published var options: StringSearchOptions = .default
 
     @Published private(set) var results: [ConsoleSearchResultViewModel] = []
@@ -143,7 +142,7 @@ final class ConsoleSearchViewModel: ObservableObject, ConsoleSearchOperationDele
             dirtyDate = Date()
         }
 
-        let operation = ConsoleSearchOperation(entities: entities.value, parameters: parameters, service: searchService, context: context)
+        let operation = ConsoleSearchOperation(entities: entities.value, parameters: parameters, service: searchService, context: context, store: store)
         operation.delegate = self
         operation.resume()
         self.operation = operation
@@ -168,7 +167,8 @@ final class ConsoleSearchViewModel: ObservableObject, ConsoleSearchOperationDele
         guard !parameters.isEmpty else {
             return
         }
-        let operation = ConsoleSearchOperation(entities: entities, parameters: parameters, service: searchService, context: context)
+        let operation = ConsoleSearchOperation(entities: entities, parameters: parameters, service: searchService,
+                                               context: context, store: store)
         operation.delegate = self
         operation.resume()
         self.refreshResultsOperation = operation
@@ -326,6 +326,7 @@ struct ConsoleSearchResultViewModel: Identifiable {
     var id: ConsoleSearchResultKey { ConsoleSearchResultKey(id: entity.objectID) }
     let entity: NSManagedObject
     let occurrences: [ConsoleSearchOccurrence]
+    let store: LoggerStore
 }
 
 struct ConsoleSearchResultKey: Hashable{

@@ -332,9 +332,14 @@ public final class ChartInfoEntity: NSManagedObject {
     @NSManaged public var minYScale: Double
     @NSManaged public var maxYScale: Double
     @NSManaged public var dataPointWidth: Double
+    @NSManaged public var points: Set<ChartPointEntity>
 
     /// Associated (technical) message.
     @NSManaged public var message: LoggerMessageEntity?
+
+    public var orderedPoints: [ChartPointEntity] {
+        points.sorted { $0.timestamp < $1.timestamp }
+    }
 }
 
 public final class ChartPointEntity: NSManagedObject {

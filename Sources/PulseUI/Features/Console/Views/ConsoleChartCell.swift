@@ -11,12 +11,8 @@ import Pulse
 import CoreData
 import Combine
 
-#if os(watchOS) || os(tvOS) || os(macOS)
-
-
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
-struct ConsoleChartView: View {
-    let viewModel: ConsoleChartViewModel
+struct ConsoleChartCell: View {
+    let viewModel: ConsoleChartCellViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -47,10 +43,9 @@ struct ConsoleChartView: View {
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleChartView_Previews: PreviewProvider {
     static var previews: some View {
-        ConsoleChartView(viewModel: .init(chartInfo: (try! LoggerStore.mock.lastChatInfo()!)))
+        ConsoleChartCell(viewModel: .init(chartInfo: (try! LoggerStore.mock.lastChatInfo()!)))
             .padding()
             .previewLayout(.sizeThatFits)
     }
 }
-#endif
 #endif

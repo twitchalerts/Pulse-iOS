@@ -145,7 +145,8 @@ extension LoggerStore {
             Attribute(name: "minYScale", type: .doubleAttributeType),
             Attribute(name: "maxYScale", type: .doubleAttributeType),
             Attribute(name: "dataPointWidth", type: .doubleAttributeType),
-            Relationship(name: "message", type: .oneToOne(isOptional: true), entity: message)
+            Relationship(name: "message", type: .oneToOne(isOptional: true), entity: message),
+            Relationship(name: "points", type: .oneToMany, entity: chartPoint),
         ]
 
         chartPoint.properties = [

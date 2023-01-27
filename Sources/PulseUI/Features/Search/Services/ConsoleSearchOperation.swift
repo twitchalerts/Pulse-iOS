@@ -22,6 +22,7 @@ final class ConsoleSearchOperation {
     private var cutoff = 10
     private let service: ConsoleSearchService
     private let context: NSManagedObjectContext
+    private let store: LoggerStore
     private let lock: os_unfair_lock_t
     private var _isCancelled = false
 
@@ -30,12 +31,14 @@ final class ConsoleSearchOperation {
     init(entities: [NSManagedObject],
          parameters: ConsoleSearchParameters,
          service: ConsoleSearchService,
-         context: NSManagedObjectContext) {
+         context: NSManagedObjectContext,
+         store: LoggerStore) {
         self.entities = entities
         self.objectIDs = entities.map(\.objectID)
         self.parameters = parameters
         self.service = service
         self.context = context
+        self.store = store
 
         self.lock = .allocate(capacity: 1)
         self.lock.initialize(to: os_unfair_lock())
@@ -63,7 +66,7 @@ final class ConsoleSearchOperation {
                     index -= 1
                 } else {
                     DispatchQueue.main.async {
-                        self.delegate?.searchOperation(self, didAddResults: [ConsoleSearchResultViewModel(entity: self.entities[currentMatchIndex], occurrences: occurrences)])
+                        self.delegate?.searchOperation(self, didAddResults: [ConsoleSearchResultViewModel(entity: self.entities[currentMatchIndex], occurrences: occurrences, store: self.store)])
                     }
                 }
             }

@@ -68,7 +68,15 @@ struct ConsoleSearchResultView: View {
         if let message = entity as? LoggerMessageEntity {
             if let task = message.task {
                 _makeDestination(for: occurrence, task: task)
-            } else {
+            }
+            else if let chart = message.chart {
+                if #available(macOS 13.0, *) {
+                    ConsoleChartDetailsView(viewModel: .init(store: viewModel.store, chartInfo: chart))
+                } else {
+                    Text("macOS 13 is required to view chart details")
+                }
+            }
+            else {
                 ConsoleMessageDetailsView(viewModel: .init(message: message))
             }
         } else if let task = entity as? NetworkTaskEntity {
