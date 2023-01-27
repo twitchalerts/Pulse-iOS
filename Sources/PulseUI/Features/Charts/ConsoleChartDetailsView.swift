@@ -66,8 +66,9 @@ public struct ConsoleChartDetailsView: View {
 				.lineSpacing(0)
 			}
 			.groupBoxStyle(YellowGroupBoxStyle())
-			.frame(height: 250)
+			.frame(height: 300)
 			Spacer()
+            Text(viewModel.chartDescription)
 		}
 	}
 
@@ -75,21 +76,23 @@ public struct ConsoleChartDetailsView: View {
 		chart()
 		.foregroundStyle(.clear)
 		.chartXAxis {
-			AxisMarks(preset: .extended,
-				position: .bottom,
-				values: .stride (by: .day)
-			) { value in
-				AxisValueLabel(
-					format: .dateTime.day(.twoDigits)
-				)
-			}
+            AxisMarks(values: .automatic) { _ in
+                AxisGridLine(centered: false, stroke: StrokeStyle(dash: [1, 2, 3]))
+                    .foregroundStyle(Color.red)
+                AxisTick(stroke: StrokeStyle(lineWidth: 1))
+                    .foregroundStyle(Color.white)
+                AxisValueLabel(
+                    format: .dateTime
+                )
+            }
 		}
 		.chartYAxis {
 			AxisMarks(position: .trailing, values: .automatic(desiredCount: 4)) {
 				AxisGridLine()
 			}
 		}
-		.frame(width: (viewModel.chartInfoData?.dataPointWidth ?? 10) * CGFloat(viewModel.pointData.count))
+		.frame(width: (viewModel.chartInfoData?.dataPointWidth ?? 10)
+               * CGFloat(((Array<ChartData>)(viewModel.pointData)).count))
 	}
 
 	private func chartYAxis() -> some View {

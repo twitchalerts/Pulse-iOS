@@ -10,8 +10,16 @@ import Combine
 @available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleChartDetailsViewModel: NSObject, ObservableObject {
 
+	private static let dateFormatter: DateFormatter = {
+		let formatter = DateFormatter()
+		formatter.locale = Locale(identifier: "en_US")
+		formatter.dateFormat = "HH:mm:ss.SSS, yyyy-MM-dd"
+		return formatter
+	}()
+
 	@Published private(set) var chartInfoData: ChartInfo?
 	@Published private(set) var pointData: [ChartData] = []
+	@Published private(set) var chartDescription: String = ""
 
 	private var controller: NSFetchedResultsController<NSManagedObject>?
 
@@ -43,7 +51,7 @@ final class ConsoleChartDetailsViewModel: NSObject, ObservableObject {
 	
 	private func makePointFetchRequest() -> NSFetchRequest<NSManagedObject> {
 		let request: NSFetchRequest<NSManagedObject> = .init(entityName: "\(ChartPointEntity.self)")
-		request.sortDescriptors = [NSSortDescriptor(keyPath: \ChartPointEntity.createdAt, ascending: false)]
+		request.sortDescriptors = [NSSortDescriptor(keyPath: \ChartPointEntity.createdAt, ascending: true)]
 		return request
 	}
 
@@ -63,8 +71,20 @@ final class ConsoleChartDetailsViewModel: NSObject, ObservableObject {
 	}
 
 	private func reloadChartPoints(diff: CollectionDifference<NSManagedObjectID>? = nil) {
-		pointData = controller?.fetchedObjects?.compactMap { $0 as? ChartPointEntity }
-			.map { ChartData(date: $0.createdAt, value: $0.value) } ?? []
+		guard let points = controller?.fetchedObjects?.compactMap ({ $0 as? ChartPointEntity }) else { return }
+
+		pointData = points.map { ChartData(date: $0.createdAt, value: $0.value) }
+
+		chartDescription = ""
+		if let firstPoint = points.first {
+			chartDescription += "Start: \(Self.dateFormatter.string(from: firstPoint.timestamp))"
+		}
+
+		if let lastPoint = points.last {
+			chartDescription += "\nEnd: \(Self.dateFormatter.string(from: lastPoint.timestamp))"
+		}
+
+		chartDescription += "\nTotal points: \(points.count)"
 	}
 }
 

@@ -125,10 +125,11 @@ private func _asyncPopulateStore(_ store: LoggerStore) async {
             let chartId1 = logger(named: "charts")
                     .logChartInfo(chartName: "Chart \(chartIndex)", minYScale: 0, maxYScale: 5000)
 
-            let startDate = Date()
-            for interval in 0...100 {
+            var startDate = Date()
+            for _ in 0...200 {
                 logger(named: "charts").logChartValue(chartId: chartId1, value: Double(Int.random(in: 2500...3500)),
-                                                      timestamp: startDate.addingTimeInterval((TimeInterval)(interval)))
+                                                      timestamp: startDate)
+                startDate.addTimeInterval(1)
             }
         }
     }
@@ -202,10 +203,11 @@ private func _syncPopulateStore(_ store: LoggerStore) {
             let chartId1 = logger(named: "charts")
                     .logChartInfo(chartName: "Chart \(chartIndex)", minYScale: 0, maxYScale: 5000)
 
-            let startDate = Date()
-            for interval in 0...100 {
+            var startDate = Date()
+            for interval in 0...200 {
                 logger(named: "charts").logChartValue(chartId: chartId1, value: Double(Int.random(in: 2500...3500)),
-                                                      timestamp: startDate.addingTimeInterval((TimeInterval)(interval)))
+                                                      timestamp: startDate)
+                startDate.addTimeInterval(1)
             }
         }
     }
