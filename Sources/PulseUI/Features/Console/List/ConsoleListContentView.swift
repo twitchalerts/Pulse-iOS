@@ -7,6 +7,7 @@ import Pulse
 import Combine
 import SwiftUI
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleListContentView: View {
     @ObservedObject var viewModel: ConsoleListViewModel
 
@@ -122,6 +123,7 @@ struct ConsoleListContentView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsolePlainList: View {
     let entities: [NSManagedObject]
 
@@ -136,6 +138,7 @@ struct ConsolePlainList: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct PinCellViewModel: Hashable, Identifiable {
     let object: NSManagedObject
     var id: PinCellId
@@ -146,12 +149,14 @@ private struct PinCellViewModel: Hashable, Identifiable {
     }
 }
 
-// Make sure the cells 
+// Make sure the cells
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct PinCellId: Hashable {
     let id: NSManagedObjectID
 }
 
 #if os(iOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct LazyConsoleView: View {
     let title: String
     let entities: [NSManagedObject]

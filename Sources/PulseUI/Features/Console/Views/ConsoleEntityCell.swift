@@ -7,6 +7,7 @@ import SwiftUI
 import Pulse
 import CoreData
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleEntityCell: View {
     let entity: NSManagedObject
 
@@ -44,6 +45,7 @@ struct ConsoleEntityCell: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct _ConsoleMessageCell: View {
     let message: LoggerMessageEntity
     @State private var shareItems: ShareItems?
@@ -95,6 +97,7 @@ private struct _ConsoleMessageCell: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct _ConsoleTaskCell: View {
     let task: NetworkTaskEntity
     @State private var shareItems: ShareItems?
@@ -145,6 +148,7 @@ private struct _ConsoleTaskCell: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct _ConsoleChartCell: View {
     let chart: ChartEntity
     @State private var shareItems: ShareItems?
@@ -200,6 +204,7 @@ private struct TextViewPreview: View {
 #endif
 
 // Create the underlying ViewModel lazily.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct LazyNetworkInspectorView: View {
     let task: NetworkTaskEntity
 
@@ -209,6 +214,7 @@ private struct LazyNetworkInspectorView: View {
 }
 
 // Create the underlying ViewModel lazily.
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct LazyConsoleDetailsView: View {
     let message: LoggerMessageEntity
 
@@ -217,11 +223,12 @@ private struct LazyConsoleDetailsView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct LazyChartDetailsView: View {
     let chart: ChartEntity
 
     var body: some View {
-        if #available(macOS 13.0, *) {
+        if #available(iOS 16.0, tvOS 16.0, macOS 13.0, watchOS 9.0, *) {
             ConsoleChartDetailsView(chart: chart)
         } else {
             Text("macOS 13 is required")

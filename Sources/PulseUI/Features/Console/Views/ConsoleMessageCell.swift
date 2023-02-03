@@ -7,6 +7,7 @@ import Pulse
 import CoreData
 import Combine
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleMessageCell: View {
     let viewModel: ConsoleMessageCellViewModel
     var isDisclosureNeeded = false
@@ -53,6 +54,7 @@ struct ConsoleMessageCell: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ListDisclosureIndicator: View {
     var body: some View {
         Image(systemName: "chevron.right")
@@ -74,6 +76,7 @@ struct ConsoleMessageCell_Previews: PreviewProvider {
 }
 #endif
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleConstants {
 #if os(watchOS)
     static let fontTitle = Font.system(size: 14)

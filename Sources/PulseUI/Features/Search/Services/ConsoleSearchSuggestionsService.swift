@@ -169,7 +169,7 @@ final class ConsoleSearchSuggestionsService {
     }
 }
 
-@available(iOS 15, tvOS 15, *)
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 struct ConsoleSearchSuggestion: Identifiable {
     let id = UUID()
     let text: AttributedString

@@ -7,6 +7,7 @@ import Pulse
 import Combine
 import CoreData
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleTaskCell: View {
     @StateObject private var viewModel = ConsoleTaskCellViewModel()
 
@@ -119,6 +120,7 @@ struct ConsoleTaskCell: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleProgressText: View {
     let title: String
     @ObservedObject var viewModel: ProgressViewModel

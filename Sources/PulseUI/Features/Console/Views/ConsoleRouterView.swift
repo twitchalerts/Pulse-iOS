@@ -7,6 +7,7 @@ import CoreData
 import Pulse
 import Combine
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 final class ConsoleRouter: ObservableObject {
     @Published var shareItems: ShareItems?
     @Published var isShowingAsText = false
@@ -18,7 +19,7 @@ final class ConsoleRouter: ObservableObject {
     @Published var isShowingDocumentBrowser = false
 }
 
-
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleRouterView: View {
     let viewModel: ConsoleViewModel
     @ObservedObject var router: ConsoleRouter
@@ -34,6 +35,7 @@ struct ConsoleRouterView: View {
 }
 
 #if os(iOS)
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleRouterView {
     var contents: some View {
         Text("").invisible()
@@ -104,6 +106,7 @@ extension ConsoleRouterView {
 
 import UniformTypeIdentifiers
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct DocumentBrowser: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> DocumentBrowserViewController {
         DocumentBrowserViewController(forOpeningContentTypes: [UTType(filenameExtension: "pulse")].compactMap { $0 })
@@ -116,6 +119,7 @@ private struct DocumentBrowser: UIViewControllerRepresentable {
 
 #elseif os(watchOS)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleRouterView {
     var contents: some View {
         Text("").invisible()
@@ -144,6 +148,7 @@ extension ConsoleRouterView {
 
 #else
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleRouterView {
     var contents: some View {
         Text("").invisible()

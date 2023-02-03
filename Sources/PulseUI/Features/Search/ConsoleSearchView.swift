@@ -9,7 +9,7 @@ import Combine
 
 #if os(iOS)
 
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 15.0, macOS 13.0, *)
 struct ConsoleSearchView: View {
     @ObservedObject var viewModel: ConsoleSearchViewModel
     let consoleViewModel: ConsoleViewModel

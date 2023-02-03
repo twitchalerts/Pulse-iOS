@@ -59,6 +59,7 @@ public struct ConsoleView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleListView: View {
     let viewModel: ConsoleViewModel
     @ObservedObject private var searchBarViewModel: ConsoleSearchBarViewModel
@@ -122,6 +123,7 @@ private struct _ConsoleSearchableContentView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct _ConsoleRegularContentView: View {
     let viewModel: ConsoleViewModel
 

@@ -18,7 +18,8 @@ final class ConsoleViewModel: ObservableObject {
 
 #if os(iOS)
     let insightsViewModel: InsightsViewModel
-    @available(iOS 15, tvOS 15, *)
+
+    @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
     var searchViewModel: ConsoleSearchViewModel {
         _searchViewModel as! ConsoleSearchViewModel
     }

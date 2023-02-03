@@ -12,7 +12,7 @@ final class ConsoleSearchBarViewModel: ObservableObject {
     @Published var tokens: [ConsoleSearchToken] = []
 }
 
-@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 final class ConsoleSearchViewModel: ObservableObject, ConsoleSearchOperationDelegate {
     private var entities: CurrentValueSubject<[NSManagedObject], Never>
 

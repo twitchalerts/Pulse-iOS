@@ -6,6 +6,7 @@ import SwiftUI
 import Pulse
 import Combine
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleSearchCriteriaView: View {
     @ObservedObject var viewModel: ConsoleSearchCriteriaViewModel
 
@@ -74,6 +75,7 @@ struct ConsoleSearchCriteriaView: View {
 
 // MARK: - ConsoleSearchView (Shared)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleSearchCriteriaView {
     var timePeriodSection: some View {
         ConsoleSearchSection(header: {
@@ -86,6 +88,7 @@ extension ConsoleSearchCriteriaView {
 
 // MARK: - ConsoleSearchView (Message)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleSearchCriteriaView {
 #if os(iOS) || os(macOS)
     @available(iOS 15, *)
@@ -125,6 +128,7 @@ extension ConsoleSearchCriteriaView {
 
 // MARK: - ConsoleSearchView (Network)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension ConsoleSearchCriteriaView {
 #if os(iOS) || os(macOS)
     @available(iOS 15, *)
@@ -180,6 +184,7 @@ extension ConsoleSearchCriteriaView {
 #if DEBUG
 import CoreData
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleSearchCriteriaView_Previews: PreviewProvider {
     static var previews: some View {
 #if os(macOS)
@@ -210,6 +215,7 @@ struct ConsoleSearchCriteriaView_Previews: PreviewProvider {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private func makePreview(isOnlyNetwork: Bool) -> some View {
     let store = LoggerStore.mock
     let entities: [NSManagedObject] = try! isOnlyNetwork ? store.allTasks() : store.allMessages()

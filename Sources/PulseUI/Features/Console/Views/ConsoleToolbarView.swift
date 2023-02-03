@@ -9,6 +9,7 @@ import Combine
 
 #if os(iOS)
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleToolbarView: View {
     let viewModel: ConsoleViewModel
 
@@ -33,6 +34,7 @@ struct ConsoleToolbarView: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleModePicker: View {
     let viewModel: ConsoleViewModel
     @ObservedObject var logsCounter: ManagedObjectsCountObserver
@@ -63,6 +65,7 @@ private struct ConsoleModePicker: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleToolbarTitle: View {
     let viewModel: ConsoleViewModel
 
@@ -82,6 +85,7 @@ private struct ConsoleToolbarTitle: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct ConsoleModeButton: View {
     let title: String
     var details: String?
@@ -105,6 +109,7 @@ private struct ConsoleModeButton: View {
     }
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 struct ConsoleFiltersView: View {
     let viewModel: ConsoleViewModel
     @ObservedObject var listViewModel: ConsoleListViewModel

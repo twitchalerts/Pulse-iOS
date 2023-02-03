@@ -320,10 +320,12 @@ struct RichTextView_Previews: PreviewProvider {
 }
 #endif
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 private struct TextViewSearchContextKey: EnvironmentKey {
     static var defaultValue: RichTextViewModel.SearchContext?
 }
 
+@available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *)
 extension EnvironmentValues {
     var textViewSearchContext: RichTextViewModel.SearchContext? {
         get { self[TextViewSearchContextKey.self] }
