@@ -113,7 +113,7 @@ struct ConsoleContextMenu_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             VStack {
-                ConsoleContextMenu(store: .mock, insights: .init(store: .mock), isShowingAsText: .constant(false))
+                ConsoleContextMenu(viewModel: ConsoleViewModel(store: .mock))
                 Spacer()
             }
         }
