@@ -21,6 +21,7 @@ public final class NetworkLogger: @unchecked Sendable {
     private var sensitiveQueryItems: Set<String> = []
     private var sensitiveDataFields: Set<String> = []
 
+    private var isFilteringNeeded = false
     private let lock = NSLock()
 
     /// The logger configuration.
@@ -131,6 +132,8 @@ public final class NetworkLogger: @unchecked Sendable {
         }
         self.sensitiveQueryItems = configuration.sensitiveQueryItems
         self.sensitiveDataFields = configuration.sensitiveDataFields
+
+        self.isFilteringNeeded = !includedHosts.isEmpty || !excludedHosts.isEmpty || !includedURLs.isEmpty || !excludedURLs.isEmpty
     }
 
     // MARK: Logging
@@ -141,7 +144,7 @@ public final class NetworkLogger: @unchecked Sendable {
         let context = context(for: task)
         lock.unlock()
 
-        guard let originalRequest = task.originalRequest ?? context.request else { return }
+        guard let originalRequest = task.originalRequest else { return }
         send(.networkTaskCreated(LoggerStore.Event.NetworkTaskCreated(
             taskId: context.taskId,
             taskType: NetworkLogger.TaskType(task: task),
@@ -202,7 +205,7 @@ public final class NetworkLogger: @unchecked Sendable {
         let context = self.context(for: task)
         tasks[TaskKey(task: task)] = nil
 
-        guard let originalRequest = task.originalRequest ?? context.request else {
+        guard let originalRequest = task.originalRequest else {
             lock.unlock()
             return // This should never happen
         }
@@ -227,7 +230,7 @@ public final class NetworkLogger: @unchecked Sendable {
     }
 
     private func send(_ event: LoggerStore.Event) {
-        guard filter(event) else {
+        guard !isFilteringNeeded || filter(event) else {
             return
         }
         guard let event = configuration.willHandleEvent(preprocess(event)) else {
@@ -274,25 +277,17 @@ public final class NetworkLogger: @unchecked Sendable {
 
     final class TaskContext {
         let taskId = UUID()
-        var request: URLRequest?
         lazy var data = Data()
         var metrics: NetworkLogger.Metrics?
     }
 
     private func context(for task: URLSessionTask) -> TaskContext {
-        func getContext() -> TaskContext {
-            let key = TaskKey(task: task)
-            if let context = tasks[key] {
-                return context
-            }
-            let context = TaskContext()
-            tasks[key] = context
+        let key = TaskKey(task: task)
+        if let context = tasks[key] {
             return context
         }
-        let context = getContext()
-        if let request = task.originalRequest {
-            context.request = request
-        }
+        let context = TaskContext()
+        tasks[key] = context
         return context
     }
 

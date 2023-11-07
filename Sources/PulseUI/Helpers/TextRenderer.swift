@@ -86,11 +86,11 @@ final class TextRenderer {
         }
     }
 
-    func render(_ task: NetworkTaskEntity, content: NetworkContent) {
+    func render(_ task: NetworkTaskEntity, content: NetworkContent, store: LoggerStore) {
         if content.contains(.largeHeader) {
-            renderLargeHeader(for: task)
+            renderLargeHeader(for: task, store: store)
         } else if content.contains(.header) {
-            renderHeader(for: task)
+            renderHeader(for: task, store: store)
         }
 
         if content.contains(.taskDetails) {
@@ -158,10 +158,11 @@ final class TextRenderer {
         string.deleteCharacters(in: NSRange(location: string.length - 1, length: 1))
     }
 
-    private func renderLargeHeader(for task: NetworkTaskEntity) {
-        let status = NetworkRequestStatusCellModel(task: task)
+    private func renderLargeHeader(for task: NetworkTaskEntity, store: LoggerStore) {
+        let status = NetworkRequestStatusCellModel(task: task, store: store)
 
-        string.append(render(status.title + "\n", role: .title, weight: .semibold, color: UXColor(status.tintColor)))
+        let suffix = status.isMock ? " (mock)" : ""
+        string.append(render(status.status.title + suffix + "\n", role: .title, weight: .semibold, color: UXColor(status.status.tint)))
         string.append(self.spacer())
         var urlAttributes = helper.attributes(role: .body2, weight: .regular)
         urlAttributes[.underlineColor] = UXColor.clear
@@ -170,11 +171,11 @@ final class TextRenderer {
         addSpacer()
     }
 
-    private func renderHeader(for task: NetworkTaskEntity) {
+    private func renderHeader(for task: NetworkTaskEntity, store: LoggerStore) {
         let isTitleColored = task.state == .failure && options.color != .monochrome
         let titleColor = isTitleColored ? UXColor.systemRed : UXColor.secondaryLabel
         let detailsColor = isTitleColored ? UXColor.systemRed : UXColor.label
-        let title = ConsoleFormatter.subheadline(for: task)
+        let title = ConsoleFormatter.subheadline(for: task, store: store)
         string.append(title + "\n", helper.attributes(role: .subheadline, style: .monospacedDigital, width: .condensed, color: titleColor))
         var urlAttributes = helper.attributes(role: .body2, weight: .medium, color: detailsColor)
         urlAttributes[.underlineColor] = UXColor.clear
@@ -182,12 +183,12 @@ final class TextRenderer {
         addSpacer()
     }
 
-    func renderCompact(_ task: NetworkTaskEntity) {
+    func renderCompact(_ task: NetworkTaskEntity, store: LoggerStore) {
         let isTitleColored = task.state == .failure && options.color != .monochrome
         let titleColor = isTitleColored ? UXColor.systemRed : UXColor.secondaryLabel
         let detailsColor = isTitleColored ? UXColor.systemRed : UXColor.label
         let time = ConsoleFormatter.time(for: task.createdAt)
-        let status = ConsoleFormatter.status(for: task)
+        let status = StatusLabelViewModel(task: task, store: store).title
         string.append("\(time)\(ConsoleFormatter.separator)\(status)\(ConsoleFormatter.separator)", helper.attributes(role: .body2, style: .monospacedDigital, width: .condensed, color: titleColor))
         var urlAttributes = helper.attributes(role: .body2, weight: .medium, color: detailsColor)
         urlAttributes[.link] = task.objectID.uriRepresentation()
@@ -201,9 +202,9 @@ final class TextRenderer {
 
     func render(_ transaction: NetworkTransactionMetricsEntity) {
         do {
-            let status = NetworkRequestStatusCellModel(transaction: transaction)
+            let status = StatusLabelViewModel(transaction: transaction)
             let method = transaction.request.httpMethod ?? "GET"
-            string.append(render(status.title + "\n", role: .title, weight: .semibold, color: UXColor(status.tintColor)))
+            string.append(render(status.title + "\n", role: .title, weight: .semibold, color: UXColor(status.tint)))
             string.append(self.spacer())
             var urlAttributes = helper.attributes(role: .body2, weight: .regular)
             urlAttributes[.underlineColor] = UXColor.clear
@@ -418,14 +419,20 @@ extension NSAttributedString.Key {
 struct ConsoleTextRenderer_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            let string = TextRenderer(options: .sharing).make { $0.render(task, content: .sharing) }
-            let stringWithColor = TextRenderer(options: .init(color: .full)).make { $0.render(task, content: .all) }
-            let html = try! TextUtilities.html(from: TextRenderer(options: .sharing).make { $0.render(task, content: .sharing) })
+            let string = TextRenderer(options: .sharing).make {
+                $0.render(task, content: .sharing, store: .mock)
+            }
+            let stringWithColor = TextRenderer(options: .init(color: .full)).make {
+                $0.render(task, content: .all, store: .mock)
+            }
+            let html = try! TextUtilities.html(from: TextRenderer(options: .sharing).make {
+                $0.render(task, content: .sharing, store: .mock)
+            })
 
             RichTextView(viewModel: .init(string: string))
                 .previewDisplayName("Task")
 
-            RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.render(task, content: .sharing) }))
+            RichTextView(viewModel: .init(string: TextRenderer(options: .sharing).make { $0.render(task, content: .sharing, store: .mock) }))
                 .previewDisplayName("Task (Share)")
 
             RichTextView(viewModel: .init(string: stringWithColor))

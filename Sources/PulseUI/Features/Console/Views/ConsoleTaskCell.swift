@@ -13,6 +13,7 @@ struct ConsoleTaskCell: View {
     var isDisclosureNeeded = false
 
     @ObservedObject private var settings: UserSettings = .shared
+    @Environment(\.store) private var store: LoggerStore
 
     var body: some View {
 #if os(macOS)
@@ -51,7 +52,7 @@ struct ConsoleTaskCell: View {
                 MockBadgeView()
                     .padding(.trailing, 2)
             }
-            (Text(Image(systemName: task.state.iconSystemName)) + Text(" " + ConsoleFormatter.status(for: task)))
+            StatusLabelViewModel(task: task, store: store).text
                 .font(ConsoleConstants.fontTitle)
                 .fontWeight(.medium)
                 .foregroundColor(task.state.tintColor)
@@ -177,14 +178,14 @@ private let titleSpacing: CGFloat? = nil
 struct MockBadgeView: View {
     var body: some View {
         Text("MOCK")
-        #if os(watchOS)
+#if os(watchOS)
             .font(.footnote)
-        #elseif os(tvOS)
+#elseif os(tvOS)
             .font(.caption2)
-        #else
+#else
             .font(ConsoleConstants.fontInfo)
             .fontWeight(.medium)
-        #endif
+#endif
             .foregroundStyle(Color.white)
             .background(background)
     }

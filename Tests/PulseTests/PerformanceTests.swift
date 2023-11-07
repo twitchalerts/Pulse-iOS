@@ -19,9 +19,13 @@ final class PerformanceTests: XCTestCase {
         try? FileManager.default.createDirectory(at: tempDirectoryURL, withIntermediateDirectories: true, attributes: [:])
         storeURL = tempDirectoryURL.appending(filename: "performance-tests.pulse")
 
-        store = try! LoggerStore(storeURL: storeURL, options: [.create, .synchronous])
+        store = try! LoggerStore(storeURL: storeURL, options: [.create], configuration: makeConfiguration())
+    }
 
-        populateStore()
+    private func makeConfiguration() -> LoggerStore.Configuration {
+        var configuration = LoggerStore.Configuration()
+        configuration.isAutoStartingSession = false
+        return configuration
     }
 
     override func tearDown() {
@@ -31,30 +35,18 @@ final class PerformanceTests: XCTestCase {
         try? FileManager.default.removeItem(at: tempDirectoryURL)
     }
 
-    func _testInsert() {
+    func testStorePlainMessages() {
         measure {
-            for _ in 0...5 {
-                populate(store: store)
+            populateStoreWithPlainMessages()
+            store.backgroundContext.performAndWait {
+                try? store.backgroundContext.save()
             }
-            store.backgroundContext.performAndWait {}
         }
     }
 
-    func xtestQueryByLevel() {
-        let request = NSFetchRequest<LoggerMessageEntity>(entityName: "LoggerMessageEntity")
-        request.predicate = NSPredicate(format: "level == %i", LoggerStore.Level.info.rawValue)
-
-        let moc = store.viewContext
-
-        measure {
-            let messages = (try? moc.fetch(request)) ?? []
-            XCTAssertEqual(messages.count, 20000)
-        }
-    }
-
-    func populateStore() {
-        /// Create 30000 messages
-        for _ in 0..<5000 {
+    private func populateStoreWithPlainMessages() {
+        /// Create 6000 messages
+        for _ in 0..<1000 {
             store.storeMessage(label: "application", level: .info, message:  "UIApplication.didFinishLaunching")
             store.storeMessage(label: "application", level: .info, message:  "UIApplication.willEnterForeground")
             store.storeMessage(label: "auth", level: .debug, message: "🌐 Will authorize user with name \"kean@github.com\"", metadata: [
@@ -82,6 +74,44 @@ final class PerformanceTests: XCTestCase {
                 )
             """)
             store.storeMessage(label: "default", level: .critical, message: "💥 0xDEADBEEF")
+        }
+    }
+
+    func xtestQueryByLevel() {
+        let request = NSFetchRequest<LoggerMessageEntity>(entityName: "LoggerMessageEntity")
+        request.predicate = NSPredicate(format: "level == %i", LoggerStore.Level.info.rawValue)
+
+        let moc = store.viewContext
+
+        measure {
+            let messages = (try? moc.fetch(request)) ?? []
+            XCTAssertEqual(messages.count, 20000)
+        }
+    }
+
+    func testStoreNetworkRequests() throws {
+        try store.destroy()
+        store = try LoggerStore(storeURL: storeURL, options: [.create], configuration: makeConfiguration())
+
+        let mockTask = MockDataTask.login
+        let urlSession = URLSession(configuration: .default)
+        let logger = NetworkLogger(store: store)
+
+        measure {
+            for _ in 0...25 {
+                let dataTask = urlSession.dataTask(with: mockTask.request)
+                dataTask.setValue(mockTask.response, forKey: "response")
+                logger.logTaskCreated(dataTask)
+                for i in 1...100 {
+                    logger.logTask(dataTask, didUpdateProgress: (Int64(i), 100))
+                }
+                logger.logDataTask(dataTask, didReceive: mockTask.responseBody)
+                logger.logTask(dataTask, didFinishCollecting: mockTask.metrics)
+                logger.logTask(dataTask, didCompleteWithError: nil)
+            }
+            store.backgroundContext.performAndWait {
+                try? store.backgroundContext.save()
+            }
         }
     }
 }

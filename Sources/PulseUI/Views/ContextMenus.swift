@@ -29,16 +29,6 @@ enum ContextMenu {
             }
             Section {
                 Menu(content: {
-                    Button("Hide Label '\(message.label)'") {
-                        filters.criteria.messages.labels.hidden.insert(message.label)
-                    }
-                    Button("Hide Level '\(message.logLevel.name)'") {
-                        filters.criteria.messages.logLevels.levels.remove(message.logLevel)
-                    }
-                }, label: {
-                    Label("Hide", systemImage: "eye.slash")
-                })
-                Menu(content: {
                     Button("Show Label '\(message.label)'") {
                         filters.criteria.messages.labels.focused = message.label
                     }
@@ -47,6 +37,16 @@ enum ContextMenu {
                     }
                 }, label: {
                     Label("Show", systemImage: "eye")
+                })
+                Menu(content: {
+                    Button("Hide Label '\(message.label)'") {
+                        filters.criteria.messages.labels.hidden.insert(message.label)
+                    }
+                    Button("Hide Level '\(message.logLevel.name)'") {
+                        filters.criteria.messages.logLevels.levels.remove(message.logLevel)
+                    }
+                }, label: {
+                    Label("Hide", systemImage: "eye.slash")
                 })
             }
             Section {
@@ -66,7 +66,7 @@ enum ContextMenu {
         @Binding private(set) var sharedTask: NetworkTaskEntity?
 #endif
 
-        @EnvironmentObject private var environment: ConsoleEnvironment
+        var isDetailsView = false
 
         var body: some View {
             Section {
@@ -79,11 +79,11 @@ enum ContextMenu {
 #endif
                 ContextMenu.NetworkTaskCopyMenu(task: task)
             }
-//            if environment.mode == .network {
-//                Section {
-//                    NetworkTaskFilterMenu(task: task)
-//                }
-//            }
+#if os(iOS)
+            if !isDetailsView {
+                NetworkTaskFilterMenu(task: task)
+            }
+#endif
             if let message = task.message {
                 Section {
                     PinButton(viewModel: .init(message))
@@ -98,26 +98,46 @@ enum ContextMenu {
     struct NetworkTaskFilterMenu: View {
         let task: NetworkTaskEntity
 
+        @EnvironmentObject private var environment: ConsoleEnvironment
         @EnvironmentObject private var filters: ConsoleFiltersViewModel
 
         var body: some View {
+            if environment.mode == .network {
+                Section {
+                    menus
+                }
+            }
+        }
+
+        @ViewBuilder
+        private var menus: some View {
             Menu(content: {
                 if let host = task.host {
-                    Button("Hide Host '\(host)'") {
-                        filters.criteria.network.host.hidden.insert(host)
+                    Button("Host '\(host)'") {
+                        filters.criteria.network.host.focused = host
                     }
                 }
-            }, label: {
-                Label("Hide", systemImage: "eye.slash")
-            })
-            Menu(content: {
-                if let host = task.host {
-                    Button("Show Host '\(host)'") {
-                        filters.criteria.network.host.focused = host
+                if let url = task.url {
+                    Button("URL '\(url)'") {
+                        filters.criteria.network.url.focused = url
                     }
                 }
             }, label: {
                 Label("Show", systemImage: "eye")
+            })
+            Menu(content: {
+                if let host = task.host {
+                    Button("Host '\(host)'") {
+                        filters.criteria.network.host.hidden.insert(host)
+                    }
+                }
+                if let url = task.url {
+                    Button("URL '\(url)'") {
+                        filters.criteria.network.url.focused = url
+                    }
+                }
+            }, label: {
+                Label("Hide", systemImage: "eye.slash")
             })
         }
     }
@@ -125,6 +145,8 @@ enum ContextMenu {
     struct NetworkTaskShareMenu: View {
         let task: NetworkTaskEntity
         @Binding var shareItems: ShareItems?
+
+        @Environment(\.store) private var store
 
         var body: some View {
             Menu(content: content) {
@@ -136,7 +158,7 @@ enum ContextMenu {
         private func content() -> some View {
             AttributedStringShareMenu(shareItems: $shareItems) {
                 TextRenderer(options: .sharing).make {
-                    $0.render(task, content: .sharing)
+                    $0.render(task, content: .sharing, store: store)
                 }
             }
             Button(action: { shareItems = ShareItems([task.cURLDescription()]) }) {
@@ -313,7 +335,7 @@ struct StringSearchOptionsMenu_Previews: PreviewProvider {
             Spacer()
             Menu(content: {
                 AttributedStringShareMenu(shareItems: .constant(nil)) {
-                    TextRenderer(options: .sharing).make { $0.render(LoggerStore.preview.entity(for: .login), content: .sharing) }
+                    TextRenderer(options: .sharing).make { $0.render(LoggerStore.preview.entity(for: .login), content: .sharing, store: .mock) }
                 }
             }) {
                 Text("Attributed String Share")

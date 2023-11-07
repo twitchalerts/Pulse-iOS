@@ -53,16 +53,16 @@ extension LoggerStore {
         var expectedBlobRatio = 0.7
         var trimRatio = 0.7
 
-        /// Every 20 minutes.
-        var sweepInterval: TimeInterval = 1200
+        /// Every 1 hour.
+        var sweepInterval: TimeInterval = 3600
 
         /// If enabled, all blobs will be stored in a compressed format and
         /// decompressed on the fly, significantly reducing the space usage.
         var isBlobCompressionEnabled = true
 
         /// Determines how often the messages are saved to the database. By default,
-        /// 250 milliseconds - quickly enough, but avoiding too many individual writes.
-        public var saveInterval: DispatchTimeInterval = .milliseconds(250)
+        /// 300 milliseconds - quickly enough, but avoiding too many individual writes.
+        public var saveInterval: DispatchTimeInterval = .milliseconds(300)
 
         /// If `true`, the images added to the store as saved as small thumbnails.
         public var isStoringOnlyImageThumbnails = true
